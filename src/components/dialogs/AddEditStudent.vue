@@ -6,80 +6,97 @@
           {{ studentData ? "EDIT" : "ADD" }} RECORDS
         </div>
         <div class="text-subtitle2 q-mb-md">Basic Info</div>
-        <div class="row q-gutter-x-sm">
-          <q-input
-            v-model="student.fname"
-            dense
-            outlined
-            label="Fist Name"
-            rounded
-          />
-          <q-input
-            v-model="student.lname"
-            dense
-            outlined
-            label="Last Name"
-            rounded
-          />
-          <q-input
-            v-model="student.mname"
-            dense
-            outlined
-            label="Middle Name"
-            rounded
-          />
+        <div class="row q-gutter-sm">
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model="student.fname"
+              dense
+              outlined
+              label="Fist Name"
+              rounded
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model="student.lname"
+              dense
+              outlined
+              label="Last Name"
+              rounded
+            />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input
+              v-model="student.mname"
+              dense
+              outlined
+              label="Middle Name"
+              rounded
+            />
+          </div>
         </div>
         <div class="flex items-center q-gutter-x-sm q-mt-md">
           <div class="text-body2">Birth Date:</div>
           <q-input v-model="student.birthDate" outlined type="date" dense />
         </div>
-        <div class="q-mt-sm row justify-around">
-          <q-input v-model="student.course" dense label="Course" />
-          <q-input v-model="student.year" dense label="Year" />
-          <q-input v-model="student.section" dense label="Section" />
+        <div class="q-mt-sm row justify-around q-gutter-sm">
+          <div class="col-12 col-md-3">
+            <q-input v-model="student.course" dense label="Course" />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input v-model="student.year" dense label="Year" />
+          </div>
+          <div class="col-12 col-md-3">
+            <q-input v-model="student.section" dense label="Section" />
+          </div>
         </div>
       </q-card-section>
 
       <q-separator />
       <!-- Vaccine Details -->
       <q-card-section class="bg-grey-1">
-        <div class="text-subtitle2">VACCINE DETAILS</div>
-        <div class="flex flex-center justify-between">
-          <q-checkbox
+        <div class="text-subtitle2">Vaccination Details</div>
+        <div class="q-pa-md" style="width: 300px">
+          <q-select
+            class="inset"
+            filled
             v-model="student.vaccine"
-            true-value="johnson & johnson"
+            :options="vaccineOpt"
+            label="Vaccine"
           />
-          <div class="text-caption">
-            Please check the box if Johnson & Johnson
-          </div>
-          <div class="text-body2">Date:</div>
-          <q-input v-model="student.johnsonVaccineDate" type="date" dense />
         </div>
-        <div v-show="student.vaccine !== 'johnson & johnson'" class="q-mt-sm">
-          <div class="q-mb-md">
-            <div class="text-subtitle2 q-mb-md">First Dose</div>
-            <div class="row justify-around items-center q-gutter-x-sm">
+
+        <div class="q-mb-md">
+          <div class="text-subtitle2 q-mb-md">First Dose</div>
+          <div class="row justify-around items-center q-gutter-sm">
+            <div class="col-12 col-md-3">
               <q-input
                 v-model="student.firstDose.city"
                 dense
                 outlined
                 label="City/Municipality"
               />
-              <div class="text-body2">Date:</div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="text-subtitle2">Date</div>
               <q-input v-model="student.firstDose.date" type="date" dense />
             </div>
           </div>
+        </div>
 
-          <div>
-            <div class="text-subtitle2 q-mb-md">Second Dose</div>
-            <div class="row justify-around items-center q-gutter-x-sm">
+        <div v-show="student.vaccine !== 'Johnson & Johnson\'s Janssen'">
+          <div class="text-subtitle2 q-mb-md">Second Dose</div>
+          <div class="row justify-around items-center q-gutter-sm">
+            <div class="col-12 col-md-3">
               <q-input
                 v-model="student.secondDose.city"
                 dense
                 outlined
                 label="City/Municipality"
               />
-              <div class="text-body2">Date:</div>
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="text-subtitle2">Date</div>
               <q-input v-model="student.secondDose.date" type="date" dense />
             </div>
           </div>
@@ -92,15 +109,20 @@
           <div class="text-subtitle2 q-mb-md">
             Booster <span class="text-negative">(not required)</span>
           </div>
-          <div class="row justify-around items-center q-gutter-x-sm">
-            <q-input
-              v-model="student.booster.city"
-              dense
-              outlined
-              label="City/Municipality"
-            />
-            <div class="text-body2">Date:</div>
-            <q-input v-model="student.booster.date" type="date" dense />
+
+          <div class="row justify-around items-center q-gutter-sm">
+            <div class="col-12 col-md-3">
+              <q-input
+                v-model="student.booster.city"
+                dense
+                outlined
+                label="City/Municipality"
+              />
+            </div>
+            <div class="col-12 col-md-3">
+              <div class="text-subtitle2">Date</div>
+              <q-input v-model="student.booster.date" type="date" dense />
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -125,6 +147,12 @@
           v-close-popup
         />
       </q-card-actions>
+
+      <GMapAutocomplete
+        placeholder="This is a placeholder"
+        @place_changed="setPlace"
+      >
+      </GMapAutocomplete>
     </q-card>
   </q-dialog>
 </template>
@@ -141,6 +169,15 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
 
 const props = defineProps(["studentData"]);
 
+const setPlace = () => console.log("here");
+
+const vaccineOpt = [
+  "Johnson & Johnson's Janssen",
+  "Pfizer",
+  "CoronaVac (Sinovac)",
+  "Moderna",
+  "Covaxin",
+];
 const student = reactive({
   fname: "",
   lname: "",
@@ -149,7 +186,7 @@ const student = reactive({
   course: "",
   year: "",
   section: "",
-  vaccine: false,
+  vaccine: "",
   johnsonVaccineDate: "",
   firstDose: {
     city: "",
