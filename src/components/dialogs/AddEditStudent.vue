@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef">
-    <q-card style="width: 700px; max-width: 80vw">
+    <q-card class="q-pa-sm" style="width: 700px; max-width: 80vw">
       <q-card-section>
         <div class="text-h6 q-mx-md text-center">
           {{ studentData ? "EDIT" : "ADD" }} RECORDS
@@ -12,7 +12,7 @@
               v-model="student.fname"
               dense
               outlined
-              label="Fist Name"
+              placeholder="Fist Name"
               rounded
             />
           </div>
@@ -21,7 +21,7 @@
               v-model="student.lname"
               dense
               outlined
-              label="Last Name"
+              placeholder="Last Name"
               rounded
             />
           </div>
@@ -30,13 +30,13 @@
               v-model="student.mname"
               dense
               outlined
-              label="Middle Name"
+              placeholder="Middle Name"
               rounded
             />
           </div>
         </div>
         <div class="flex items-center q-gutter-x-sm q-mt-md">
-          <div class="text-body2">Birth Date:</div>
+          <div class="text-body2">Birth Date</div>
           <q-input v-model="student.birthDate" outlined type="date" dense />
         </div>
         <div class="q-mt-sm row justify-around q-gutter-sm">
@@ -54,7 +54,7 @@
 
       <q-separator />
       <!-- Vaccine Details -->
-      <q-card-section class="bg-grey-1">
+      <q-card-section class="bg-blue-1">
         <div class="text-subtitle2">Vaccination Details</div>
         <div class="q-pa-md" style="width: 300px">
           <q-select
@@ -70,11 +70,19 @@
           <div class="text-subtitle2 q-mb-md">First Dose</div>
           <div class="row justify-around items-center q-gutter-sm">
             <div class="col-12 col-md-3">
-              <q-input
-                v-model="student.firstDose.city"
+              <q-select
                 dense
                 outlined
-                label="City/Municipality"
+                v-model="student.firstDose.city"
+                label="City or Municipality"
+                use-input
+                input-debounce="0"
+                :options="filterOptions"
+                option-value="city"
+                option-label="city"
+                emit-value
+                @filter="filterFn"
+                style="width: 250px"
               />
             </div>
             <div class="col-12 col-md-3">
@@ -88,11 +96,19 @@
           <div class="text-subtitle2 q-mb-md">Second Dose</div>
           <div class="row justify-around items-center q-gutter-sm">
             <div class="col-12 col-md-3">
-              <q-input
-                v-model="student.secondDose.city"
+              <q-select
                 dense
                 outlined
-                label="City/Municipality"
+                v-model="student.secondDose.city"
+                label="City or Municipality"
+                use-input
+                input-debounce="0"
+                :options="filterOptions"
+                option-value="city"
+                option-label="city"
+                emit-value
+                @filter="filterFn"
+                style="width: 250px"
               />
             </div>
             <div class="col-12 col-md-3">
@@ -112,11 +128,19 @@
 
           <div class="row justify-around items-center q-gutter-sm">
             <div class="col-12 col-md-3">
-              <q-input
-                v-model="student.booster.city"
+              <q-select
                 dense
                 outlined
-                label="City/Municipality"
+                v-model="student.booster.city"
+                label="City or Municipality"
+                use-input
+                input-debounce="0"
+                :options="filterOptions"
+                option-value="city"
+                option-label="city"
+                emit-value
+                @filter="filterFn"
+                style="width: 250px"
               />
             </div>
             <div class="col-12 col-md-3">
@@ -147,18 +171,13 @@
           v-close-popup
         />
       </q-card-actions>
-
-      <GMapAutocomplete
-        placeholder="This is a placeholder"
-        @place_changed="setPlace"
-      >
-      </GMapAutocomplete>
     </q-card>
   </q-dialog>
 </template>
 <script setup>
 import { reactive, onMounted, watch, ref } from "vue";
 import { useDialogPluginComponent } from "quasar";
+import phjson from "src/json/ph.json";
 // Import Stores
 import { useStudentStore } from "src/stores/students";
 
@@ -169,7 +188,19 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
 
 const props = defineProps(["studentData"]);
 
-const setPlace = () => console.log("here");
+const filterOptions = ref(phjson);
+const filterFn = (val, update) => {
+  update(() => {
+    if (val === "") {
+      filterOptions.value = phjson;
+    } else {
+      const needle = val.toLowerCase();
+      filterOptions.value = phjson.filter(
+        (v) => v.city.toLowerCase().indexOf(needle) > -1
+      );
+    }
+  });
+};
 
 const vaccineOpt = [
   "Johnson & Johnson's Janssen",
