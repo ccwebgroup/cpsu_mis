@@ -1,6 +1,6 @@
 <template>
   <q-dialog ref="dialogRef">
-    <q-card class="q-pa-sm" style="width: 700px; max-width: 80vw">
+    <q-card class="q-pa-sm" style="max-width: 900px">
       <q-card-section>
         <div class="text-h6 q-mx-md text-center">
           {{ studentData ? "EDIT" : "ADD" }} RECORDS

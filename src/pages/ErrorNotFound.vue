@@ -1,31 +1,41 @@
 <template>
-  <div class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center">
+  <div
+    class="fullscreen bg-blue text-white text-center q-pa-md flex flex-center"
+  >
     <div>
-      <div style="font-size: 30vh">
-        404
-      </div>
+      <img
+        class="ccs_logo"
+        src="~assets/ccs-logo.png"
+        alt=""
+        style="max-width: 140px"
+      />
+      <img src="~assets/svg/nothing_here.svg" alt="" style="max-width: 350px" />
 
-      <div class="text-h2" style="opacity:.4">
-        Oops. Nothing here...
+      <div class="text-h5" style="opacity: 0.4">
+        Oops.. Sorry, nothing here.
       </div>
 
       <q-btn
         class="q-mt-xl"
-        color="white"
-        text-color="blue"
-        unelevated
+        padding="xs xl"
+        color="primary"
+        rounded
         to="/"
-        label="Go Home"
+        label="Go Back to Home Page"
         no-caps
       />
     </div>
   </div>
 </template>
+<style lang="sass">
+.ccs_logo
+  position: absolute
+</style>
 
 <script>
-import { defineComponent } from 'vue'
+import { defineComponent } from "vue";
 
 export default defineComponent({
-  name: 'ErrorNotFound'
-})
+  name: "ErrorNotFound",
+});
 </script>

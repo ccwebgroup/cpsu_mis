@@ -24,17 +24,14 @@ export default defineComponent({
 
     caption: {
       type: String,
-      default: "",
     },
 
     link: {
       type: String,
-      default: "#",
     },
 
     icon: {
       type: String,
-      default: "",
     },
   },
 });

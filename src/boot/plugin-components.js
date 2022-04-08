@@ -1,10 +1,6 @@
 import { boot } from "quasar/wrappers";
+import { QrStream } from "vue3-qr-reader";
 
 export default boot(async ({ app }) => {
-  // app.use(VueGoogleMaps, {
-  //   load: {
-  //     key: "AIzaSyALETJ1WieE-VmDQKAALvu593ma8MWTtFE",
-  //     libraries: "places",
-  //   },
-  // });
+  app.component("qr-stream", QrStream);
 });
