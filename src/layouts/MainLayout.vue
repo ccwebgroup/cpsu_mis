@@ -6,7 +6,7 @@
 
         <q-toolbar-title>
           <q-avatar>
-            <img src="~assets/logo/cpsu-logo.svg" />
+            <img src="~assets/img/ccs-logo.png" />
           </q-avatar>
           MIS-Sys
         </q-toolbar-title>
