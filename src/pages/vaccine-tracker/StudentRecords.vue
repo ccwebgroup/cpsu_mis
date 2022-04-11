@@ -23,6 +23,7 @@
           :filter="filter"
           :columns="studentCols"
           :loading="loading"
+          :pagination="{ rowsPerPage: 15 }"
         >
           <template v-slot:top-right>
             <q-input
@@ -42,7 +43,7 @@
             <q-tr :props="props">
               <q-td>
                 {{
-                  `${props.row.lname}, ${props.row.fname} ${props.row.lname[0]}.`
+                  `${props.row.lname}, ${props.row.fname} ${props.row.mname[0]}.`
                 }}
               </q-td>
               <q-td>

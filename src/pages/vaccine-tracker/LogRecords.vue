@@ -2,7 +2,7 @@
   <q-page padding>
     <q-card class="q-pa-sm">
       <q-card-actions>
-        <q-btn
+        <!-- <q-btn
           to="/vaccination-tracker/qr-scanner"
           padding="xs lg"
           no-caps
@@ -10,11 +10,30 @@
           color="primary"
           icon="qr_code_scanner"
           label="Qr Code Scanner"
-        />
+        /> -->
       </q-card-actions>
-
+      <div class="flex-center" style="max-width: 400px">
+        <q-input
+          dense
+          rounded
+          outlined
+          debounce="500"
+          v-model="filter"
+          placeholder="Search"
+        >
+          <template v-slot:append>
+            <q-icon name="search" />
+          </template>
+        </q-input>
+      </div>
       <!-- Logs Table -->
-      <q-table title="Log Records" :rows="allVaxLogs" :columns="logColumns">
+      <q-table
+        title="Log Records"
+        :filter="filter"
+        :rows="allVaxLogs"
+        :columns="logColumns"
+        :pagination="{ rowsPerPage: 15 }"
+      >
         <template v-slot:top-right>
           <q-btn
             color="primary"
@@ -27,10 +46,11 @@
         <template v-slot:body="props">
           <q-tr>
             <q-td>{{
-              `${props.row.studentInfo.lname}, ${props.row.studentInfo.fname} ${props.row.studentInfo.mname}.`
+              `${props.row.studentInfo.lname}, ${props.row.studentInfo.fname} ${props.row.studentInfo.mname[0]}.`
             }}</q-td>
             <q-td>{{ logDateFormat(props.row.timeIn.toDate()) }}</q-td>
             <q-td>{{ logTimeFormat(props.row.timeIn.toDate()) }}</q-td>
+            <q-td>{{ props.row.temperature }}</q-td>
           </q-tr>
         </template>
       </q-table>
@@ -39,7 +59,7 @@
 </template>
 
 <script setup>
-import { computed, onBeforeMount } from "vue";
+import { computed, onBeforeMount, ref } from "vue";
 import { exportFile, useQuasar } from "quasar";
 // Import Composables
 import { useDate } from "src/composables/qdate";
@@ -102,13 +122,14 @@ const exportTable = () => {
 };
 
 // Log Table Data
+const filter = ref("");
 const logColumns = [
   {
     label: "Student Name",
     name: "Student Name",
     field: (row) =>
-      `${row.studentInfo.lname}, ${row.studentInfo.fname} ${row.studentInfo.mname}.`,
-    align: "center",
+      `${row.studentInfo.lname}, ${row.studentInfo.fname} ${row.studentInfo.mname[0]}.`,
+    align: "left",
     required: true,
   },
   {
@@ -129,7 +150,15 @@ const logColumns = [
     required: true,
     sortable: true,
   },
+  {
+    label: "Temperature",
+    name: "Temperature",
+    field: (row) => row.temperature,
+    align: "left",
+    required: true,
+    sortable: true,
+  },
 ];
-const allVaxLogs = computed(() => vaxLogStore.allVaxlogs);
+const allVaxLogs = computed(() => vaxLogStore.formattedLogs);
 onBeforeMount(() => vaxLogStore.getAllVaxlogs());
 </script>

@@ -3,7 +3,7 @@
     <q-card flat class="q-mt-xl q-mx-auto q-pt-md" style="max-width: 350px">
       <div class="text-center">
         <q-avatar size="110px">
-          <img src="~assets/ccs-logo.png" alt="" />
+          <img src="~assets/logo/ccs-logo.svg" alt="" />
         </q-avatar>
         <div class="text-h6">MIS-Sys</div>
       </div>

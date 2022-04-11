@@ -11,6 +11,13 @@ export const useVaxLogStore = defineStore("vaxLogs", {
   state: () => ({
     allVaxlogs: [],
   }),
+
+  getters: {
+    formattedLogs: (state) => {
+      return state.allVaxlogs.sort((a, b) => b.timeIn - a.timeIn);
+    },
+  },
+
   actions: {
     async getAllVaxlogs() {
       this.allVaxlogs = [];

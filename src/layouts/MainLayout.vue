@@ -6,7 +6,7 @@
 
         <q-toolbar-title>
           <q-avatar>
-            <img src="~assets/logo/ccs-logo.jpg" />
+            <img src="~assets/logo/cpsu-logo.svg" />
           </q-avatar>
           MIS-Sys
         </q-toolbar-title>
@@ -31,7 +31,7 @@
           default-opened
         >
           <q-list>
-            <q-item
+            <!-- <q-item
               clickable
               to="/vaccination-tracker/qr-scanner"
               :inset-level="1"
@@ -42,7 +42,7 @@
               <q-item-section>
                 <q-item-label class="text-subititle">QR Scanner</q-item-label>
               </q-item-section>
-            </q-item>
+            </q-item> -->
             <q-item
               clickable
               to="/vaccination-tracker/student-records"
