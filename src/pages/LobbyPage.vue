@@ -37,6 +37,23 @@
       <q-spinner-comment size="50px" color="primary" />
     </q-inner-loading>
 
+    <!-- place QPageScroller at end of page -->
+    <q-page-scroller
+      v-show="!loading"
+      reverse
+      position="top"
+      :scroll-offset="20"
+      :offset="[0, 18]"
+    >
+      <q-btn
+        fab
+        icon="keyboard_arrow_down"
+        padding="none xl"
+        label="Move"
+        color="accent"
+      />
+    </q-page-scroller>
+
     <q-footer elevated class="bg-primary q-pa-sm">
       <q-form @submit="send">
         <q-input
@@ -48,7 +65,7 @@
           placeholder="Type here..."
         >
           <template v-slot:after>
-            <q-btn :disable="!message" flat round icon="send" />
+            <q-btn @click="send" :disable="!message" flat round icon="send" />
           </template>
         </q-input>
       </q-form>
