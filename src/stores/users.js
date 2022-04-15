@@ -8,81 +8,160 @@ export const useUserStore = defineStore("users", {
     users: [],
   }),
   actions: {
-    async deleteUser(payload) {
+    async setUserRole(uid, role) {
+      const token = await auth.currentUser.getIdToken();
+      let roleData = {};
+      switch (role) {
+        case "Admin":
+          roleData = { admin: true };
+          break;
+        case "Faculty":
+          roleData = { faculty: true };
+          break;
+        case "Staff":
+          roleData = { staff: true };
+          break;
+        case "Student":
+          roleData = { student: true };
+          break;
+        case "Technical":
+          roleData = { technical: true };
+          break;
+        case "Not Set":
+          role = "";
+          roleData = null;
+          break;
+      }
+      try {
+        await this.api.put("addRole/" + uid, roleData, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        await firestore.updateDoc(firestore.doc(db, "users", uid), {
+          role: role,
+        });
+        const index = this.users.findIndex((item) => item.uid == uid);
+        if (index > -1) {
+          this.users[index].role = role;
+        }
+
+        Notify.create({
+          type: "positive",
+          message: `Added ${Object.keys(role)[0]} role to the user.`,
+          icon: "manage_accounts",
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    },
+
+    async updateUser(payload) {
+      const token = await auth.currentUser.getIdToken();
+      try {
+        const result = await this.api.put(
+          "updateUser/" + payload.uid,
+          payload,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        if (result) {
+          const user = result.data;
+          const userRef = firestore.doc(db, "users", user.uid);
+          await firestore.updateDoc(userRef, user);
+
+          const index = this.users.findIndex((item) => item.uid == user.uid);
+          if (index > -1) {
+            Object.assign(this.users[index], user);
+          }
+
+          Notify.create({
+            type: "positive",
+            message: "User succesfuly updated.",
+            icon: "edit_note",
+          });
+        }
+      } catch (err) {
+        console.log(err.message);
+      }
+    },
+
+    async deleteUser(uid) {
+      const token = await auth.currentUser.getIdToken();
       Dialog.create({
         title: "Confirm",
         message: "Are you sure you want to delete the user?",
         cancel: true,
       }).onOk(async () => {
-        await firestore.deleteDoc(firestore.doc(db, "users", payload.id));
-        this.users = this.users.filter((item) => item.id !== payload.id);
+        try {
+          const result = await this.api.delete("deleteUser/" + uid, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          });
+          if (result.status == 200) {
+            await firestore.deleteDoc(firestore.doc(db, "users", uid));
+            this.users = this.users.filter((item) => item.uid !== uid);
+          }
 
-        Dialog.create({
-          title: "Process successful!",
-          message:
-            "User was deleted from the database. Please remove user in the authentication service of firebase.",
-        });
+          Notify.create({
+            type: "negative",
+            message: "User permanently deleted.",
+            icon: "delete_forever",
+          });
+        } catch (err) {}
       });
     },
 
     async getUsers() {
-      this.users = [];
-      const snapshots = await firestore.getDocs(
-        firestore.collection(db, "users")
-      );
-      snapshots.forEach((userDoc) => {
-        const userData = userDoc.data();
-        userData.createdAt = userData.createdAt.toDate();
-        this.users.push(userData);
-      });
-    },
-
-    async addUser(payload) {
+      const token = await auth.currentUser.getIdToken();
       try {
-        const userCredential = await fireauth.createUserWithEmailAndPassword(
-          auth,
-          payload.email,
-          payload.password
-        );
-        const user = userCredential.user;
-
-        if (user) {
-          const userSnap = await firestore.setDoc(
-            firestore.doc(db, "users", user.uid),
-            {
-              email: payload.email,
-              id: user.uid,
-              role: payload.role,
-              createdAt: firestore.serverTimestamp(),
-            }
-          );
-
-          this.users.push({
-            createdAt: new Date(),
-            email: payload.email,
-            username: payload.username,
-            id: user.uid,
-            role: payload.role,
-          });
-
-          Notify.create({
-            type: "positive",
-            icon: "person_add",
-            message: "User succesfully registered.",
-          });
-        }
-      } catch (err) {
-        const errorCode = err.code;
-        const errorMessage = err.message;
-        Dialog.create({
-          title: "Registration Error",
-          message: errorMessage,
+        const result = await this.api.get("getUsers", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         });
+        result.data.forEach(async (user) => {
+          const userSnap = await firestore.getDoc(
+            firestore.doc(db, "users", user.uid)
+          );
+          if (userSnap.exists()) {
+            Object.assign(user, userSnap.data());
+            const index = this.users.findIndex((item) => item.uid == user.uid);
+            if (index == -1) {
+              this.users.push(user);
+            }
+          }
+        });
+      } catch (err) {
+        console.log(err);
       }
     },
 
-    async logoutUser() {
-      await auth.signOut();
+    async addUser(payload) {
+      const token = await auth.currentUser.getIdToken();
+      try {
+        const result = await this.api.post("addUser", payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (result) {
+          const userData = result.data;
+          const { password, uid, ...user } = payload;
+          const userRef = firestore.doc(db, "users", userData.uid);
+          await firestore.setDoc(userRef, user);
+          this.users.unshift(result.data);
+        }
+      } catch (err) {
+        console.log(err.message);
+      }
+    },
+
+    logoutUser() {
+      auth.signOut();
       this.router.replace("/auth/login");
     },
 
@@ -96,7 +175,7 @@ export const useUserStore = defineStore("users", {
         if (this.$route.query.redirect) {
           this.router.push(this.$route.query.redirect);
         } else {
-          this.router.replace("/dashboard");
+          this.router.replace("/home");
         }
       } catch (err) {
         const errorCode = err.code;

@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 export default boot(async ({ router }) => {
   const auth = getAuth();
+  let claims;
 
   await new Promise((resolve) => {
     const stopObserver = onAuthStateChanged(getAuth(), (firebaseUser) => {
@@ -10,6 +11,12 @@ export default boot(async ({ router }) => {
       stopObserver();
     });
   });
+  if (auth.currentUser) {
+    const token = await auth.currentUser.getIdTokenResult();
+    if (token.claims.admin) claims = "admin";
+  } else {
+    claims = null;
+  }
 
   router.beforeEach((to, from) => {
     if (to.meta.requiresAuth && !auth.currentUser) {
@@ -17,6 +24,12 @@ export default boot(async ({ router }) => {
         path: "/auth/login",
         // save the location we were at to come back later
         query: { redirect: to.fullPath },
+      };
+    }
+
+    if (to.meta.requireAdmin && claims !== "admin") {
+      return {
+        path: "/notfound",
       };
     }
 

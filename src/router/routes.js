@@ -18,11 +18,15 @@ const routes = [
       requiresAuth: true,
     },
     component: () => import("layouts/MainLayout.vue"),
-    redirect: "/dashboard",
+    redirect: "/home",
     children: [
       {
-        path: "/dashboard",
-        component: () => import("src/pages/DashboardPage.vue"),
+        path: "/home",
+        component: () => import("src/pages/HomePage.vue"),
+      },
+      {
+        path: "/lobby",
+        component: () => import("src/pages/LobbyPage.vue"),
       },
     ],
   },

@@ -39,16 +39,34 @@
           <div class="text-body2">Birth Date</div>
           <q-input v-model="student.birthDate" outlined type="date" dense />
         </div>
-        <div class="q-mt-sm row justify-around q-gutter-sm">
-          <div class="col-12 col-md-3">
-            <q-input v-model="student.course" dense label="Course" />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input v-model="student.year" dense label="Year" />
-          </div>
-          <div class="col-12 col-md-3">
-            <q-input v-model="student.section" dense label="Section" />
-          </div>
+        <div class="q-mt-sm flex flex-center q-gutter-md">
+          <q-select
+            v-model="student.course"
+            :options="courses"
+            label="Course"
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            style="width: 100px"
+            dense
+          />
+          <q-select
+            v-model="student.year"
+            :options="[1, 2, 3, 4]"
+            label="Year"
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            dense
+            style="width: 70px"
+          />
+          <q-select
+            v-model="student.section"
+            :options="['A', 'B', 'C', 'D', 'E']"
+            label="Section"
+            transition-show="jump-up"
+            transition-hide="jump-up"
+            dense
+            style="width: 90px"
+          />
         </div>
       </q-card-section>
 
@@ -201,6 +219,8 @@ const filterFn = (val, update) => {
     }
   });
 };
+
+const courses = ["BSIT", "BEED", "BSED", "BSHM", "BAS", "BSCRIM"];
 
 const vaccineOpt = [
   "Johnson & Johnson's Janssen",

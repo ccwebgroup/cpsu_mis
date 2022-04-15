@@ -2,7 +2,9 @@
   <q-dialog ref="dialogRef">
     <q-card style="width: 350px">
       <q-card-section>
-        <div class="text-h6">Add User</div>
+        <div class="text-h6 text-center">
+          {{ userData ? "Edit" : "Add" }} User
+        </div>
         <q-form
           @submit="save"
           ref="userForm"
@@ -16,6 +18,18 @@
             filled
             placeholder="Email"
             :rules="[(val) => !!val || 'Field is required']"
+          >
+            <template v-slot:prepend>
+              <q-icon name="email" />
+            </template>
+          </q-input>
+          <q-input
+            v-model="user.displayName"
+            rounded
+            dense
+            outlined
+            placeholder="Display Name"
+            :rules="[(val) => !!val || 'Field is required']"
           />
           <q-input
             :type="isPwd ? 'password' : 'text'"
@@ -23,8 +37,9 @@
             rounded
             dense
             outlined
-            placeholder="Password"
-            :rules="[(val) => !!val || 'Field is required']"
+            :placeholder="userData ? 'New Password' : 'Password'"
+            :hint="userData ? 'Leave blank if not changing' : ''"
+            :rules="[(val) => !!userData || !!val || 'Field is required']"
           >
             <template v-slot:append>
               <q-icon
@@ -34,18 +49,17 @@
               />
             </template>
           </q-input>
-          <q-select
-            v-model="user.role"
-            outlined
+          <q-input
+            v-model="user.phoneNumber"
             dense
-            :options="['Administrator', 'Staff', 'Faculty', 'Technical']"
-            hint="User Management Role"
-            :rules="[(val) => !!val || 'Field is required']"
+            outlined
+            mask="+63 ### ### ####"
+            placeholder="Mobile Number"
           >
             <template v-slot:prepend>
-              <q-icon name="manage_accounts" />
+              <q-icon name="phone_android" />
             </template>
-          </q-select>
+          </q-input>
           <div class="row justify-around q-mt-lg">
             <q-btn
               dense
@@ -54,6 +68,7 @@
               rounded
               outline
               label="Cancel"
+              v-close-popup
             />
             <q-btn
               type="submit"
@@ -71,7 +86,7 @@
 </template>
 
 <script setup>
-import { reactive, ref } from "vue";
+import { reactive, ref, onMounted } from "vue";
 import { useDialogPluginComponent } from "quasar";
 // Import Stores
 import { useUserStore } from "src/stores/users";
@@ -82,16 +97,36 @@ const { dialogRef, onDialogHide, onDialogOK, onDialogCancel } =
 
 const isPwd = ref(true);
 const initialState = {
+  uid: "",
   email: "",
   password: "",
-  role: "",
+  displayName: "",
+  phoneNumber: "",
 };
+
+const props = defineProps(["userData"]);
 
 const user = reactive(initialState);
 
 const save = async () => {
-  await userStore.addUser(user);
+  if (props.userData) {
+    await userStore.updateUser(user);
+  } else {
+    await userStore.addUser(user);
+  }
   Object.assign(user, initialState);
   onDialogOK();
 };
+
+onMounted(() => {
+  const userDetails = props.userData;
+  if (props.userData) {
+    Object.assign(user, {
+      uid: userDetails.uid,
+      email: userDetails.email,
+      displayName: userDetails.displayName,
+      phoneNumber: userDetails.phoneNumber,
+    });
+  }
+});
 </script>

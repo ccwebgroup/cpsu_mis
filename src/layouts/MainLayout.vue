@@ -1,5 +1,5 @@
 <template>
-  <q-layout view="hHh LpR fFf">
+  <q-layout view="hHh LpR lFr" con>
     <q-header bordered class="bg-primary text-white">
       <q-toolbar>
         <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
@@ -10,12 +10,36 @@
           </q-avatar>
           MIS-Sys
         </q-toolbar-title>
+
+        <q-btn
+          dense
+          flat
+          round
+          :icon="rightDrawerOpen ? 'menu_open' : 'double_arrow'"
+          @click="toggleRightDrawer"
+        />
       </q-toolbar>
     </q-header>
 
     <q-drawer show-if-above v-model="leftDrawerOpen" side="left" bordered>
       <!-- drawer content -->
-      <q-list class="q-mt-md" padding dense>
+      <q-list padding dense>
+        <!-- User Details -->
+        <q-item class="q-mb-md">
+          <q-item-section avatar>
+            <q-avatar color="primary" size="56px" class="q-mb-sm">
+              <q-icon color="white" name="fas fa-user-tie" />
+            </q-avatar>
+          </q-item-section>
+          <q-item-section>
+            <q-item-label class="text-subtitle1 text-bold">
+              {{ authUser.displayName }}
+            </q-item-label>
+            <q-item-label caption>{{
+              authUser.admin ? "Admin" : authUser.email
+            }}</q-item-label>
+          </q-item-section>
+        </q-item>
         <EssentialLink
           v-for="link in linksList"
           :key="link.title"
@@ -73,6 +97,7 @@
         </q-expansion-item>
 
         <q-expansion-item
+          v-if="authUser.admin"
           class="text-subtitle1"
           expand-separator
           icon="admin_panel_settings"
@@ -126,6 +151,18 @@
       </q-list>
     </q-drawer>
 
+    <q-drawer
+      class="bg-grey-1 q-pa-md"
+      show-if-above
+      v-model="rightDrawerOpen"
+      side="right"
+      bordered
+    >
+      <!-- drawer content -->
+      <div class="text-h6">Updates</div>
+      <div class="text-body2">Under development..</div>
+    </q-drawer>
+
     <q-page-container>
       <router-view />
     </q-page-container>
@@ -133,7 +170,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { ref, inject, watch } from "vue";
 import EssentialLink from "src/components/EssentialLink.vue";
 import { useQuasar } from "quasar";
 import { useUserStore } from "src/stores/users";
@@ -149,15 +186,27 @@ watch(dark_mode, (mode, oldMode) => {
 });
 
 const leftDrawerOpen = ref(false);
-const linksList = [
-  {
-    title: "Dashboard",
-    icon: "dashboard",
-    link: "/dashboard",
-  },
-];
-
+const rightDrawerOpen = ref(false);
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
+const toggleRightDrawer = () => {
+  rightDrawerOpen.value = !rightDrawerOpen.value;
+};
+
+const linksList = [
+  {
+    title: "Home",
+    icon: "home",
+    link: "/home",
+  },
+  {
+    title: "Lobby",
+    icon: "space_dashboard",
+    link: "/lobby",
+  },
+];
+
+// Authuser
+const authUser = inject("authUser");
 </script>

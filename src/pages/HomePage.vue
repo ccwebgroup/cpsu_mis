@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <div class="text-h6">Dashboard</div>
+    <div class="text-h6">Home Page</div>
     <div class="text-center">
       <div class="text-h6 q-mb-md q-mt-xl">
         This page is under construction.

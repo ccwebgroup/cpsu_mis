@@ -2,10 +2,12 @@
   <router-view />
 </template>
 
-<script>
-import { defineComponent } from 'vue'
+<script setup>
+import { onBeforeMount, computed, provide } from "vue";
+import { useAuthStore } from "src/stores/auth";
+const authStore = useAuthStore();
 
-export default defineComponent({
-  name: 'App'
-})
+const authUser = computed(() => authStore.authUser);
+onBeforeMount(() => authStore.handleAuthState());
+provide("authUser", authUser);
 </script>
