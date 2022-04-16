@@ -1,5 +1,5 @@
 <template>
-  <q-card>
+  <q-card dark>
     <q-card-section>
       <q-item dense>
         <q-item-section avatar>

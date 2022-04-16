@@ -16,11 +16,7 @@
         >
           <div style="max-width: 300px">
             <span> {{ message.text }}</span>
-            <link-preview
-              class="bg-transparent"
-              v-if="message.url"
-              :url="message.url[0]"
-            />
+            <link-preview v-if="message.url" :url="message.url[0]" />
           </div>
           <template v-slot:avatar>
             <q-avatar
