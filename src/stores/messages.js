@@ -22,13 +22,14 @@ export const useMessageStore = defineStore("messages", {
       audio.play();
     },
 
-    async addMessage(message) {
+    async addMessage(payload) {
       const conRef = firestore.doc(db, "conversation", "ccs");
       const mesRef = firestore.collection(conRef, "messages");
       await firestore.addDoc(mesRef, {
         createdAt: firestore.serverTimestamp(),
         fromId: auth.currentUser.uid,
-        text: message,
+        text: payload.text,
+        url: payload.url ? payload.url : null,
       });
     },
 

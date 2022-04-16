@@ -10,18 +10,30 @@
           v-for="message in messagesData"
           :key="message.id"
           :name="message.sent ? '' : message.from.displayName"
-          :text="[message.text]"
           :sent="message.sent"
           :text-color="message.sent ? 'white' : ''"
           :bg-color="message.sent ? 'primary' : 'grey-4'"
         >
+          <div style="max-width: 300px">
+            <span> {{ message.text }}</span>
+            <link-preview
+              class="bg-transparent"
+              v-if="message.url"
+              :url="message.url[0]"
+            />
+          </div>
           <template v-slot:avatar>
             <q-avatar
               size="45px"
               :color="message.sent ? 'grey-6' : 'primary'"
               class="text-white text-bold q-mx-sm"
             >
-              {{ message.from.displayName[0] }}
+              <img
+                v-if="message.from.photoURL"
+                :src="message.from.photoURL"
+                alt=""
+              />
+              <span v-else>{{ message.from.displayName[0] }}</span>
             </q-avatar>
           </template>
           <template v-slot:stamp>
@@ -84,14 +96,19 @@ import {
   watch,
 } from "vue";
 // Import Components
+import LinkPreview from "src/components/LinkPreview.vue";
 // Import Composables
 import { useDateFns } from "src/composables/date-fns";
+import { useQuasar } from "quasar";
 // Import Stores
 import { useMessageStore } from "src/stores/messages";
 // Define Stores and COmposables
 const messageStore = useMessageStore();
+const $q = useQuasar();
 const { relativeDate } = useDateFns();
 // Methods, Refs and States
+
+const handleURLClick = (preview) => {};
 
 const pageChat = ref();
 const scrollToBottom = () => {
@@ -107,12 +124,33 @@ messageStore.$subscribe((mutation, state) => {
   }
 });
 
+const getUrl = (textMessage) => {
+  const urlRegex = new RegExp(/(https?:\/\/[^\s]+)/g);
+  const urls = textMessage.match(urlRegex);
+  return urls;
+};
+
 onBeforeUnmount(() => messageStore.unsub());
 onBeforeMount(() => messageStore.getMessages({ conversationId: "ccs" }));
 const messagesData = computed(() => messageStore.getMessagesByDate);
 const message = ref("");
-const send = () => {
-  messageStore.addMessage(message.value);
+const send = async () => {
+  const urls = await getUrl(message.value);
+  if (urls) {
+    if (urls.length > 1) {
+      $q.dialog({
+        title: "Sorry, message error.",
+        message: "We detected more than 1 url in your message",
+      });
+    } else {
+      const text = message.value.replace(urls, "").trim();
+
+      messageStore.addMessage({
+        text: text,
+        url: urls,
+      });
+    }
+  }
   message.value = "";
 };
 const loading = ref(true);
