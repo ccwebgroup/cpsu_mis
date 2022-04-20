@@ -6,38 +6,45 @@
       leave-active-class="animated fadeOut"
     >
       <div v-show="!loading" class="q-pa-sm col column justify-end">
-        <q-chat-message
-          v-for="message in messagesData"
-          :key="message.id"
-          :name="message.sent ? '' : message.from.displayName"
-          :sent="message.sent"
-          :text-color="message.sent ? 'white' : ''"
-          :bg-color="message.sent ? 'primary' : 'grey-4'"
-        >
-          <div style="max-width: 300px">
-            <span> {{ message.text }}</span>
-            <link-preview v-if="message.url" :url="message.url[0]" />
-          </div>
-          <template v-slot:avatar>
-            <q-avatar
-              size="45px"
-              :color="message.sent ? 'grey-6' : 'primary'"
-              class="text-white text-bold q-mx-sm"
-            >
-              <img
-                v-if="message.from.photoURL"
-                :src="message.from.photoURL"
-                alt=""
-              />
-              <span v-else>{{ message.from.displayName[0] }}</span>
-            </q-avatar>
-          </template>
-          <template v-slot:stamp>
-            <div style="font-size: 10px">
-              {{ relativeDate(message.createdAt) }}
+        <q-infinite-scroll @load="getMore" reverse>
+          <template v-slot:loading>
+            <div class="row justify-center q-my-md q-mt-xl">
+              <q-spinner-dots color="primary" size="40px" />
             </div>
           </template>
-        </q-chat-message>
+          <q-chat-message
+            v-for="message in messagesData"
+            :key="message.id"
+            :name="message.sent ? '' : message.from.displayName"
+            :sent="message.sent"
+            :text-color="message.sent ? 'white' : ''"
+            :bg-color="message.sent ? 'primary' : 'grey-4'"
+          >
+            <div style="max-width: 300px">
+              <span> {{ message.text }}</span>
+              <link-preview v-if="message.url" :url="message.url[0]" />
+            </div>
+            <template v-slot:avatar>
+              <q-avatar
+                size="45px"
+                :color="message.sent ? 'grey-6' : 'primary'"
+                class="text-white text-bold q-mx-sm"
+              >
+                <img
+                  v-if="message.from.photoURL"
+                  :src="message.from.photoURL"
+                  alt=""
+                />
+                <span v-else>{{ message.from.displayName[0] }}</span>
+              </q-avatar>
+            </template>
+            <template v-slot:stamp>
+              <div style="font-size: 10px">
+                {{ relativeDate(message.createdAt) }}
+              </div>
+            </template>
+          </q-chat-message>
+        </q-infinite-scroll>
       </div>
     </transition>
 
@@ -103,7 +110,13 @@ const messageStore = useMessageStore();
 const $q = useQuasar();
 const { relativeDate } = useDateFns();
 // Methods, Refs and States
-
+const getMore = (index, done) => {
+  setTimeout(() => {
+    console.log("attempt more");
+    messageStore.getMoreMessages({ conversationId: "ccs" });
+    done();
+  }, 1500);
+};
 const handleURLClick = (preview) => {};
 
 const pageChat = ref();
@@ -125,28 +138,29 @@ const getUrl = (textMessage) => {
   const urls = textMessage.match(urlRegex);
   return urls;
 };
-
 onBeforeUnmount(() => messageStore.unsub());
 onBeforeMount(() => messageStore.getMessages({ conversationId: "ccs" }));
 const messagesData = computed(() => messageStore.getMessagesByDate);
 const message = ref("");
 const send = async () => {
   const urls = await getUrl(message.value);
+  let text;
   if (urls) {
     if (urls.length > 1) {
       $q.dialog({
         title: "Sorry, message error.",
         message: "We detected more than 1 url in your message",
       });
+      return;
     } else {
-      const text = message.value.replace(urls, "").trim();
-
-      messageStore.addMessage({
-        text: text,
-        url: urls,
-      });
+      text = message.value.replace(urls, "").trim();
     }
-  }
+  } else text = message.value;
+
+  messageStore.addMessage({
+    text: text,
+    url: urls,
+  });
   message.value = "";
 };
 const loading = ref(true);

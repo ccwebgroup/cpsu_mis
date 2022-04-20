@@ -50,9 +50,8 @@
           class="text-subtitle1"
           expand-separator
           icon="vaccines"
-          label="Vaccination Tracker"
-          caption="System for students."
-          default-opened
+          label="Vax Tracker"
+          caption="Covid-19 Vaccination tracker for students."
         >
           <q-list>
             <!-- <q-item
@@ -160,7 +159,10 @@
     >
       <!-- drawer content -->
       <div class="text-h6">Updates</div>
-      <div class="text-body2">Under development..</div>
+      <q-img class="q-mt-sm" src="~assets/svg/under_construction.svg" alt="" />
+      <div class="text-subtitle1 text-primary q-mt-sm">
+        Under development . . .
+      </div>
     </q-drawer>
 
     <q-page-container>
@@ -200,11 +202,11 @@ const linksList = [
     icon: "home",
     link: "/home",
   },
-  {
-    title: "Lobby",
-    icon: "space_dashboard",
-    link: "/lobby",
-  },
+  // {
+  //   title: "Lobby",
+  //   icon: "space_dashboard",
+  //   link: "/lobby",
+  // },
 ];
 
 // Authuser

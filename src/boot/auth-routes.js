@@ -1,24 +1,21 @@
 import { boot } from "quasar/wrappers";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { useAuthStore } from "src/stores/auth";
 
-export default boot(async ({ router }) => {
+export default boot(async ({ router, store }) => {
   const auth = getAuth();
-  let claims;
 
   await new Promise((resolve) => {
-    const stopObserver = onAuthStateChanged(getAuth(), (firebaseUser) => {
+    const stopObserver = onAuthStateChanged(auth, (firebaseUser) => {
       resolve(firebaseUser);
       stopObserver();
     });
   });
-  if (auth.currentUser) {
-    const token = await auth.currentUser.getIdTokenResult();
-    if (token.claims.admin) claims = "admin";
-  } else {
-    claims = null;
-  }
 
   router.beforeEach((to, from) => {
+    const authStore = useAuthStore(store);
+    console.log(authStore.authUser);
+
     if (to.meta.requiresAuth && !auth.currentUser) {
       return {
         path: "/auth/login",
@@ -27,7 +24,7 @@ export default boot(async ({ router }) => {
       };
     }
 
-    if (to.meta.requireAdmin && claims !== "admin") {
+    if (to.meta.requireAdmin && store.state.value.authUser.admin) {
       return {
         path: "/notfound",
       };

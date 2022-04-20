@@ -6,6 +6,7 @@ export const useMessageStore = defineStore("messages", {
     mesRef: {},
     messages: [],
     subscribe: {},
+    lastVisible: {},
   }),
   getters: {
     getMessagesByDate: (state) => {
@@ -68,6 +69,8 @@ export const useMessageStore = defineStore("messages", {
               this.messages.push(mesData);
             }
           }
+
+          this.lastVisible = mesSnapshot.docs[mesSnapshot.docs.length - 1];
         });
       });
     },
@@ -76,10 +79,44 @@ export const useMessageStore = defineStore("messages", {
       unsub();
     },
 
+    async getMoreMessages(payload) {
+      console.log("getting more");
+      const conRef = firestore.doc(db, "conversation", payload.conversationId);
+      const mesRef = firestore.collection(conRef, "messages");
+
+      const next = firestore.query(
+        mesRef,
+        firestore.orderBy("createdAt", "desc"),
+        firestore.startAfter(this.lastVisible),
+        firestore.limit(2)
+      );
+
+      const mesSnapshot = await firestore.getDocs(next);
+      mesSnapshot.forEach(async (mesDoc) => {
+        const mesData = mesDoc.data();
+
+        const index = this.messages.findIndex((item) => item.id === mesDoc.id);
+
+        if (index < 0) {
+          const userRef = firestore.doc(db, "users", mesData.fromId);
+          const userSnap = await firestore.getDoc(userRef);
+          mesData.from = userSnap.data();
+          if (userSnap.id == auth.currentUser.uid) mesData.sent = true;
+          mesData.createdAt = mesData.createdAt.toDate();
+          this.messages.unshift(mesData);
+        }
+      });
+    },
+
     getMessages(payload) {
       const conRef = firestore.doc(db, "conversation", payload.conversationId);
       const mesRef = firestore.collection(conRef, "messages");
-      this.mesRef = mesRef;
+      const firstQ = firestore.query(
+        mesRef,
+        firestore.orderBy("createdAt", "desc"),
+        firestore.limit(6)
+      );
+      this.mesRef = firstQ;
       this.subs();
     },
   },
