@@ -28,6 +28,16 @@ const routes = [
         path: "/lobby",
         component: () => import("src/pages/LobbyPage.vue"),
       },
+
+      // Scheduler Routes
+      {
+        path: "/scheduler/manage-data",
+        component: () => import("src/pages/scheduler/ManageData.vue"),
+      },
+      {
+        path: "/scheduler/plot-schedule",
+        component: () => import("src/pages/scheduler/PlotSchedule.vue"),
+      },
     ],
   },
 

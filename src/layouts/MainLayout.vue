@@ -6,7 +6,7 @@
 
         <q-toolbar-title>
           <q-avatar>
-            <img src="~assets/img/ccs-logo.png" />
+            <img src="logo/ccs-logo.jpg" />
           </q-avatar>
           MIS-Sys
         </q-toolbar-title>
@@ -45,6 +45,35 @@
           :key="link.title"
           v-bind="link"
         />
+        <q-separator spaced />
+        <q-expansion-item
+          class="text-subtitle1"
+          expand-separator
+          icon="today"
+          label="Scheduler"
+          caption="System for scheduling"
+        >
+          <q-list>
+            <q-item clickable to="/scheduler/manage-data" :inset-level="1">
+              <q-item-section avatar>
+                <q-icon name="edit_calendar" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-subititle">Manage Data</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable to="/scheduler/plot-schedule" :inset-level="1">
+              <q-item-section avatar>
+                <q-icon name="date_range" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-subititle"
+                  >Plot Schedule</q-item-label
+                >
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-expansion-item>
 
         <q-expansion-item
           class="text-subtitle1"
@@ -52,7 +81,6 @@
           icon="vaccines"
           label="Vaccination Tracker"
           caption="System for students."
-          default-opened
         >
           <q-list>
             <!-- <q-item
@@ -96,6 +124,7 @@
           </q-list>
         </q-expansion-item>
 
+        <q-separator spaced />
         <q-expansion-item
           v-if="authUser.admin"
           class="text-subtitle1"

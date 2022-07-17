@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { Notify } from "quasar";
 
-import { db, firestore } from "src/boot/firebase";
+import { db, fs } from "src/boot/firebase";
 
 export const useStudentStore = defineStore("students", {
   state: () => ({
@@ -9,11 +9,11 @@ export const useStudentStore = defineStore("students", {
   }),
   actions: {
     async deleteStudent(id) {
-      const studentRef = firestore.doc(db, "students", id);
-      await firestore.deleteDoc(studentRef);
+      const studentRef = fs.doc(db, "students", id);
+      await fs.deleteDoc(studentRef);
       this.students = this.students.filter((item) => item.id !== id);
       Notify.create({
-        createdAt: firestore.serverTimestamp(),
+        createdAt: fs.serverTimestamp(),
         type: "dark",
         message: "Student removed!",
         icon: "delete",
@@ -21,10 +21,10 @@ export const useStudentStore = defineStore("students", {
     },
 
     async updateStudent(payload) {
-      const studentRef = firestore.doc(db, "students", payload.id);
-      await firestore.updateDoc(studentRef, payload);
+      const studentRef = fs.doc(db, "students", payload.id);
+      await fs.updateDoc(studentRef, payload);
       Notify.create({
-        createdAt: firestore.serverTimestamp(),
+        createdAt: fs.serverTimestamp(),
         type: "positive",
         message: "Student details updated",
         icon: "edit",
@@ -37,8 +37,8 @@ export const useStudentStore = defineStore("students", {
 
     async getStudents() {
       this.students = [];
-      const studentRef = firestore.collection(db, "students");
-      const studentSnap = await firestore.getDocs(studentRef);
+      const studentRef = fs.collection(db, "students");
+      const studentSnap = await fs.getDocs(studentRef);
       studentSnap.forEach((doc) => {
         let studentData = doc.data();
         this.students.push({ ...studentData, id: doc.id });
@@ -46,10 +46,10 @@ export const useStudentStore = defineStore("students", {
     },
 
     async addStudent(payload) {
-      const studentRef = firestore.collection(db, "students");
-      const docSnap = await firestore.addDoc(studentRef, payload);
+      const studentRef = fs.collection(db, "students");
+      const docSnap = await fs.addDoc(studentRef, payload);
       Notify.create({
-        createdAt: firestore.serverTimestamp(),
+        createdAt: fs.serverTimestamp(),
         type: "positive",
         message: "Student succesfuly added",
         icon: "thumb_up",

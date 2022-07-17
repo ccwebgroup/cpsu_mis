@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-import { auth, fireauth } from "src/boot/firebase";
+import { auth, fa } from "src/boot/firebase";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
@@ -8,7 +8,7 @@ export const useAuthStore = defineStore("auth", {
   }),
   actions: {
     handleAuthState() {
-      fireauth.onAuthStateChanged(auth, async (user) => {
+      fa.onAuthStateChanged(auth, async (user) => {
         if (user) {
           const idTokenResult = await auth.currentUser.getIdTokenResult();
           if (idTokenResult.claims.admin) user.admin = true;

@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { Notify, Dialog } from "quasar";
 
-import { db, auth, fireauth, firestore } from "src/boot/firebase";
+import { db, auth, fa, fs } from "src/boot/firebase";
 
 export const useUserStore = defineStore("users", {
   state: () => ({
@@ -37,7 +37,7 @@ export const useUserStore = defineStore("users", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
-        await firestore.updateDoc(firestore.doc(db, "users", uid), {
+        await fs.updateDoc(fs.doc(db, "users", uid), {
           role: role,
         });
         const index = this.users.findIndex((item) => item.uid == uid);
@@ -69,8 +69,8 @@ export const useUserStore = defineStore("users", {
         );
         if (result) {
           const user = result.data;
-          const userRef = firestore.doc(db, "users", user.uid);
-          await firestore.updateDoc(userRef, user);
+          const userRef = fs.doc(db, "users", user.uid);
+          await fs.updateDoc(userRef, user);
 
           const index = this.users.findIndex((item) => item.uid == user.uid);
           if (index > -1) {
@@ -102,7 +102,7 @@ export const useUserStore = defineStore("users", {
             },
           });
           if (result.status == 200) {
-            await firestore.deleteDoc(firestore.doc(db, "users", uid));
+            await fs.deleteDoc(fs.doc(db, "users", uid));
             this.users = this.users.filter((item) => item.uid !== uid);
           }
 
@@ -124,9 +124,7 @@ export const useUserStore = defineStore("users", {
           },
         });
         result.data.forEach(async (user) => {
-          const userSnap = await firestore.getDoc(
-            firestore.doc(db, "users", user.uid)
-          );
+          const userSnap = await fs.getDoc(fs.doc(db, "users", user.uid));
           if (userSnap.exists()) {
             Object.assign(user, userSnap.data());
             const index = this.users.findIndex((item) => item.uid == user.uid);
@@ -151,8 +149,8 @@ export const useUserStore = defineStore("users", {
         if (result) {
           const userData = result.data;
           const { password, uid, ...user } = payload;
-          const userRef = firestore.doc(db, "users", userData.uid);
-          await firestore.setDoc(userRef, user);
+          const userRef = fs.doc(db, "users", userData.uid);
+          await fs.setDoc(userRef, user);
           this.users.unshift(result.data);
         }
       } catch (err) {
@@ -167,7 +165,7 @@ export const useUserStore = defineStore("users", {
 
     async loginUser(payload) {
       try {
-        const userCredential = await fireauth.signInWithEmailAndPassword(
+        const userCredential = await fa.signInWithEmailAndPassword(
           auth,
           payload.email,
           payload.password
@@ -188,12 +186,12 @@ export const useUserStore = defineStore("users", {
     },
 
     async reauthUser(payload) {
-      const credential = fireauth.EmailAuthProvider.credential(
+      const credential = fa.EmailAuthProvider.credential(
         payload.email,
         payload.password
       );
 
-      await fireauth.reauthenticateWithCredential(auth.currentUser, credential);
+      await fa.reauthenticateWithCredential(auth.currentUser, credential);
       return credential;
     },
   },

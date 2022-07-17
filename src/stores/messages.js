@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { auth, db, firestore } from "src/boot/firebase";
+import { auth, db, fs } from "src/boot/firebase";
 
 export const useMessageStore = defineStore("messages", {
   state: () => ({
@@ -23,10 +23,10 @@ export const useMessageStore = defineStore("messages", {
     },
 
     async addMessage(payload) {
-      const conRef = firestore.doc(db, "conversation", "ccs");
-      const mesRef = firestore.collection(conRef, "messages");
-      await firestore.addDoc(mesRef, {
-        createdAt: firestore.serverTimestamp(),
+      const conRef = fs.doc(db, "conversation", "ccs");
+      const mesRef = fs.collection(conRef, "messages");
+      await fs.addDoc(mesRef, {
+        createdAt: fs.serverTimestamp(),
         fromId: auth.currentUser.uid,
         text: payload.text,
         url: payload.url ? payload.url : null,
@@ -34,7 +34,7 @@ export const useMessageStore = defineStore("messages", {
     },
 
     subs() {
-      firestore.onSnapshot(this.mesRef, (mesSnapshot) => {
+      fs.onSnapshot(this.mesRef, (mesSnapshot) => {
         mesSnapshot.docChanges().forEach(async (change) => {
           const mesData = change.doc.data();
           mesData.id = change.doc.id;
@@ -45,8 +45,8 @@ export const useMessageStore = defineStore("messages", {
             );
 
             if (index < 0) {
-              const userRef = firestore.doc(db, "users", mesData.fromId);
-              const userSnap = await firestore.getDoc(userRef);
+              const userRef = fs.doc(db, "users", mesData.fromId);
+              const userSnap = await fs.getDoc(userRef);
               mesData.from = userSnap.data();
               if (userSnap.id == auth.currentUser.uid) mesData.sent = true;
               if (userSnap.id !== auth.currentUser.uid) {
@@ -72,13 +72,13 @@ export const useMessageStore = defineStore("messages", {
       });
     },
     unsub() {
-      const unsub = firestore.onSnapshot(this.mesRef, () => {});
+      const unsub = fs.onSnapshot(this.mesRef, () => {});
       unsub();
     },
 
     getMessages(payload) {
-      const conRef = firestore.doc(db, "conversation", payload.conversationId);
-      const mesRef = firestore.collection(conRef, "messages");
+      const conRef = fs.doc(db, "conversation", payload.conversationId);
+      const mesRef = fs.collection(conRef, "messages");
       this.mesRef = mesRef;
       this.subs();
     },

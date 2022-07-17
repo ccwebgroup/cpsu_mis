@@ -5,7 +5,7 @@
     <div>
       <img
         class="ccs_logo"
-        src="~assets/logo/ccs-logo.svg"
+        src="logo/ccs-logo.jpg"
         alt=""
         style="max-width: 140px"
       />

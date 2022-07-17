@@ -140,13 +140,17 @@ const send = async () => {
       });
     } else {
       const text = message.value.replace(urls, "").trim();
-
       messageStore.addMessage({
         text: text,
         url: urls,
       });
     }
+  } else {
+    messageStore.addMessage({
+      text: message.value,
+    });
   }
+
   message.value = "";
 };
 const loading = ref(true);
