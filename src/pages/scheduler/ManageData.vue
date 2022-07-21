@@ -4,24 +4,30 @@
     <div class="q-gutter-y-md">
       <!-- Subjects -->
       <q-card>
-        <q-card-section class="row justify-between">
-          <div class="col">
-            <div class="text-subtitle1">Subjects</div>
-          </div>
-          <div class="col">
-            <q-btn
-              @click="handleSubjDialog(null)"
-              flat
-              no-caps
-              icon="add"
-              label="New Subject"
-              color="primary"
-            />
-          </div>
-        </q-card-section>
-
         <q-card-section>
-          <q-table dense flat :columns="subCols" :rows="subjects">
+          <q-table
+            :filter="filterSubs"
+            dense
+            flat
+            :columns="subCols"
+            :rows="subjects"
+          >
+            <template v-slot:top>
+              <q-btn
+                @click="handleSubjDialog(null)"
+                flat
+                no-caps
+                icon="add"
+                label="Subject"
+                color="primary"
+              />
+              <q-space />
+              <q-input v-model="filterSubs" dense outlined placeholder="Search">
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </template>
             <template v-slot:body-cell-actions="props">
               <q-td :props="props">
                 <q-btn
@@ -45,25 +51,38 @@
           </q-table>
         </q-card-section>
       </q-card>
+
       <!-- Course -->
       <q-card>
-        <q-card-section class="row justify-between">
-          <div class="col">
-            <div class="text-subtitle1">Courses</div>
-          </div>
-          <div class="col">
-            <q-btn
-              @click="handleCourseDialog(null)"
-              flat
-              no-caps
-              icon="add"
-              label="New Class"
-              color="primary"
-            />
-          </div>
-        </q-card-section>
-        <q-card-section>
-          <q-table dense flat :rows="courses" :columns="courseCols">
+        <q-card-section class="q-pt-xs">
+          <q-table
+            :filter="filterCourses"
+            dense
+            flat
+            :rows="courses"
+            :columns="courseCols"
+          >
+            <template v-slot:top>
+              <q-btn
+                @click="handleCourseDialog(null)"
+                flat
+                no-caps
+                icon="add"
+                label="Course"
+                color="primary"
+              />
+              <q-space />
+              <q-input
+                v-model="filterCourses"
+                dense
+                outlined
+                placeholder="Search"
+              >
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </template>
             <template v-slot:body-cell-actions="props">
               <q-td :props="props">
                 <q-btn
@@ -79,26 +98,34 @@
           </q-table>
         </q-card-section>
       </q-card>
+
       <!-- Instructors -->
       <q-card>
-        <q-card-section class="row justify-between">
-          <div class="col">
-            <div class="text-subtitle1">Instructors</div>
-          </div>
-          <div class="col">
-            <q-btn
-              @click="handleInsDialog(null)"
-              flat
-              no-caps
-              icon="add"
-              label="New Instructor"
-              color="primary"
-            />
-          </div>
-        </q-card-section>
-
         <q-card-section>
-          <q-table dense flat :rows="instructors" :columns="insCols">
+          <q-table
+            :filter="filterIns"
+            dense
+            flat
+            :rows="instructors"
+            :columns="insCols"
+          >
+            <template v-slot:top>
+              <q-btn
+                @click="handleInsDialog(null)"
+                flat
+                no-caps
+                icon="add"
+                label="Instructor"
+                color="primary"
+              />
+              <q-space />
+              <q-input v-model="filterIns" dense outlined placeholder="Search">
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </template>
+
             <template v-slot:body-cell-actions="props">
               <q-td :props="props">
                 <q-btn
@@ -125,11 +152,14 @@
       <!-- Rooms -->
       <q-card>
         <q-card-section>
-          <div class="row justify-between q-mb-md">
-            <div class="col">
-              <div class="text-subtitle1">Rooms</div>
-            </div>
-            <div class="col">
+          <q-table
+            :filter="filterRooms"
+            dense
+            flat
+            :rows="rooms"
+            :columns="roomCols"
+          >
+            <template v-slot:top>
               <q-input
                 dense
                 v-model="roomName"
@@ -140,9 +170,18 @@
                   <q-btn @click="addRoom" round flat icon="add" />
                 </template>
               </q-input>
-            </div>
-          </div>
-          <q-table dense flat :rows="rooms" :columns="roomCols">
+              <q-space />
+              <q-input
+                v-model="filterRooms"
+                dense
+                outlined
+                placeholder="Search"
+              >
+                <template v-slot:append>
+                  <q-icon name="search" />
+                </template>
+              </q-input>
+            </template>
             <template v-slot:body-cell-actions="props">
               <q-td :props="props">
                 <q-btn
@@ -170,8 +209,12 @@ import InstructorForm from "src/components/dialogs/InstructorForm";
 import { computed, ref } from "vue";
 import { schedStore } from "stores/scheduler";
 
-const $q = useQuasar();
-const roomName = ref("");
+const $q = useQuasar(),
+  roomName = ref(""),
+  filterSubs = ref(""),
+  filterCourses = ref(""),
+  filterIns = ref(""),
+  filterRooms = ref("");
 
 const subjects = computed(() => schedStore().subjects);
 const courses = computed(() => schedStore().courses);

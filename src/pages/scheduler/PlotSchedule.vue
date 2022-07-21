@@ -9,7 +9,7 @@
             style="max-width: 200px"
           >
             <q-btn
-              @click="printSched"
+              v-print="printObj"
               dense
               dark
               no-caps
@@ -17,7 +17,7 @@
               icon="print"
               color="primary"
             />
-            <q-btn
+            <!-- <q-btn
               dense
               dark
               no-caps
@@ -25,7 +25,7 @@
               icon="save"
               color="primary"
               type="submit"
-            />
+            /> -->
           </div>
 
           <div class="row q-gutter-x-sm justify-center">
@@ -39,7 +39,7 @@
                 input-debounce="0"
                 hint="Subject"
                 :options="subOptions"
-                option-label="code"
+                :option-label="(val) => (val === null ? null : val.code)"
                 option-value="id"
                 emit-value
                 map-options
@@ -57,9 +57,9 @@
               </q-select>
             </div>
 
-            <div class="col-12 col-md-5 column items-center">
-              <!-- COurse year and section -->
-              <q-select
+            <!-- <div class="col-12 col-md-5 column items-center"> -->
+            <!-- COurse year and section -->
+            <!-- <q-select
                 v-model="schedData.courseId"
                 dense
                 outlined
@@ -83,25 +83,52 @@
                   </q-item>
                 </template>
               </q-select>
-            </div>
+            </div> -->
           </div>
 
           <div class="row q-gutter-x-sm q-mt-sm justify-center">
-            <div class="col-12 col-md-5 column items-center">
+            <div class="col-12 col-md-4">
+              <!-- Courses and Section -->
+              <q-select
+                v-model="schedData.courseId"
+                @update:model-value="syncSched('course')"
+                dense
+                outlined
+                use-input
+                input-debounce="0"
+                hint="Course & Section"
+                :options="courseOptions"
+                :option-label="(val) => (val === null ? null : val.name)"
+                option-value="id"
+                emit-value
+                map-options
+                @filter="filterCourse"
+                :rules="[(val) => !!val || 'Course & section is required!']"
+              >
+                <template v-slot:no-option>
+                  <q-item>
+                    <q-item-section class="text-grey">
+                      No results
+                    </q-item-section>
+                  </q-item>
+                </template>
+              </q-select>
+            </div>
+            <div class="col-12 col-md-4">
               <!-- Instructor -->
               <q-select
                 v-model="schedData.instructorId"
+                @update:model-value="syncSched('ins')"
                 use-input
                 dense
                 outlined
                 input-debounce="0"
                 hint="Instructor"
                 :options="insOptions"
-                option-label="name"
+                :option-label="(val) => (val === null ? null : val.name)"
                 option-value="id"
                 emit-value
                 map-options
-                style="width: 250px"
                 @filter="filterIns"
                 :rules="[(val) => !!val || 'Instructor is required!']"
               >
@@ -115,21 +142,21 @@
               </q-select>
             </div>
 
-            <div class="col-12 col-md-5 column items-center">
+            <div class="col-12 col-md-3">
               <!-- Rooms -->
               <q-select
                 v-model="schedData.roomId"
+                @update:model-value="syncSched('room')"
                 dense
                 outlined
                 use-input
                 input-debounce="0"
                 hint="Room"
                 :options="roomOptions"
-                option-label="room"
+                :option-label="(val) => (val === null ? null : val.room)"
                 option-value="id"
                 emit-value
                 map-options
-                style="width: 250px"
                 @filter="filterRooms"
                 :rules="[(val) => !!val || 'Room is required!']"
               >
@@ -144,7 +171,7 @@
             </div>
           </div>
 
-          <q-item-label class="q-mt-md q-mb-sm text-subtitle2"
+          <!-- <q-item-label class="q-mt-md q-mb-sm text-subtitle2"
             >Schedule</q-item-label
           >
           <div class="row justify-evenly q-gutter-xs">
@@ -194,9 +221,9 @@
                 >
               </q-input>
             </div>
-          </div>
+          </div> -->
 
-          <div class="text-center text-subtitle1 q-mt-md">Schedule Viewer</div>
+          <!-- <div class="text-center text-subtitle1 q-mt-md">Schedule Viewer</div> -->
           <q-card-actions align="center" class="q-py-none">
             <q-btn-toggle
               v-model="schedMode"
@@ -207,109 +234,135 @@
                 { label: 'Room', value: 'room' },
               ]"
             />
-            <q-btn @click="getScheds" flat round icon="refresh" />
+            <q-btn
+              @click="getScheds"
+              color="dark"
+              unelevated
+              icon="refresh"
+              label="Sync"
+            />
           </q-card-actions>
-
-          <div id="print-header" class="print-only">
-            <div class="flex">
-              <q-avatar size="70px">
-                <img src="~assets/png/cpsu-logo.png" />
-              </q-avatar>
-              <div class="q-py-md q-ml-md">
-                <span class="text-bold text-subtitle1 text-center">
-                  CENTRAL PHILIPPINES STATE UNIVERSITY
-                </span>
-                <div class="text-center">
-                  San Carlos City, Negros Occidental
+          <div id="printMe">
+            <div
+              id="print-header"
+              class="row justify-center q-mb-lg print-only"
+            >
+              <div class="flex">
+                <q-avatar size="70px">
+                  <img src="~assets/png/cpsu-logo.png" />
+                </q-avatar>
+                <div class="q-py-md q-ml-md">
+                  <span class="text-bold text-subtitle1 text-center">
+                    CENTRAL PHILIPPINES STATE UNIVERSITY
+                  </span>
+                  <div class="text-center">
+                    San Carlos City, Negros Occidental
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div
-            id="printMe"
-            class="q-mx-auto"
-            style="display: flex; max-width: 745px"
-          >
-            <q-calendar-day
-              ref="calendar"
-              class="q-mt-md q-mb-lg"
-              view="week"
-              :weekdays="[1, 2, 3, 4, 5]"
-              :interval-start="13"
-              :interval-minutes="30"
-              :interval-count="24"
-              animated
-              bordered
-            >
-              <template #head-intervals>
-                <div class="fit row justify-center text-subtitle1 text-bold">
-                  Time
-                </div>
-              </template>
-
-              <template #head-day="{ scope: { timestamp } }">
-                <div class="fit row justify-center">
-                  {{ displayDay(timestamp.weekday) }}
-                </div>
-              </template>
-
-              <template
-                #day-body="{
-                  scope: { timestamp, timeStartPos, timeDurationHeight },
-                }"
+            <div class="text-h6 text-center text-bold q-mt-md">
+              {{ displayScheduleTitle() }}
+            </div>
+            <div class="q-mx-auto" style="display: flex; max-width: 685px">
+              <q-calendar-day
+                ref="calendar"
+                class="q-mt-sm q-mb-lg"
+                view="week"
+                :drag-enter-func="onDragEnter"
+                :drag-over-func="onDragOver"
+                :drag-leave-func="onDragLeave"
+                :drop-func="onDrop"
+                :weekdays="[1, 2, 3, 4, 5]"
+                :interval-start="13"
+                :interval-minutes="30"
+                :interval-count="27"
+                :interval-height="25"
+                animated
+                bordered
+                hooverable
+                time-clicks-clamped
+                @mousedown-time="onMouseDownTime"
               >
-                <template v-for="sched in schedules" :key="sched.id">
-                  <transition
-                    appear
-                    enter-active-class="animated fadeIn"
-                    leave-active-class="animated fadeOut"
-                  >
-                    <div
-                      @click="handleSchedDialog(sched)"
-                      v-if="sched.day.id === timestamp.weekday"
-                      class="my-sched"
-                      :class="badgeClasses(sched, 'body')"
-                      :style="
-                        badgeStyles(
-                          sched,
-                          'body',
-                          timeStartPos,
-                          timeDurationHeight
-                        )
-                      "
+                <template #head-intervals>
+                  <div class="fit row justify-center text-subtitle1 text-bold">
+                    Time
+                  </div>
+                </template>
+
+                <template #head-day="{ scope: { timestamp } }">
+                  <div class="fit row justify-center">
+                    {{ displayDay(timestamp.weekday) }}
+                  </div>
+                </template>
+
+                <template
+                  #day-body="{
+                    scope: { timestamp, timeStartPos, timeDurationHeight },
+                  }"
+                >
+                  <template v-for="sched in schedules" :key="sched.id">
+                    <transition
+                      appear
+                      enter-active-class="animated fadeIn"
+                      leave-active-class="animated fadeOut"
                     >
-                      <div class="title text-center">
-                        <div>
-                          <div class="text-caption">
-                            {{
-                              sched.subject.code
-                                ? sched.subject.code
-                                : "Deleted!"
-                            }}
-                          </div>
-                          <div class="text-caption">
-                            {{
-                              sched.course.name ? sched.course.name : "Deleted!"
-                            }}
-                          </div>
-                          <div class="text-caption">
-                            {{
-                              sched.instructor.name
-                                ? sched.instructor.name
-                                : "Deleted!"
-                            }}
-                          </div>
-                          <div class="text-caption">
-                            {{ sched.room.room ? sched.room.room : "Deleted!" }}
+                      <div
+                        @click="handleSchedDialog(sched)"
+                        v-if="sched.day.id === timestamp.weekday"
+                        class="my-sched"
+                        draggable="true"
+                        @dragstart="onDragStart($event, sched)"
+                        :class="badgeClasses(sched, 'body')"
+                        :style="
+                          badgeStyles(
+                            sched,
+                            'body',
+                            timeStartPos,
+                            timeDurationHeight
+                          )
+                        "
+                      >
+                        <div class="title text-center">
+                          <div>
+                            <div class="text-caption">
+                              {{
+                                sched.subject.code
+                                  ? sched.subject.code
+                                  : "Deleted!"
+                              }}
+                            </div>
+                            <div class="text-caption">
+                              {{
+                                sched.course.name
+                                  ? sched.course.name
+                                  : "Deleted!"
+                              }}
+                            </div>
+                            <div class="text-caption">
+                              {{
+                                sched.instructor.name
+                                  ? sched.instructor.name
+                                  : "Deleted!"
+                              }}
+                            </div>
+                            <div class="text-caption">
+                              {{
+                                sched.room.room ? sched.room.room : "Deleted!"
+                              }}
+                            </div>
+                            <div class="text-sm q-mt-sm">
+                              {{ formatTime(sched.start) }} -
+                              {{ formatTime(sched.end) }}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </transition>
+                    </transition>
+                  </template>
                 </template>
-              </template>
-            </q-calendar-day>
+              </q-calendar-day>
+            </div>
           </div>
         </q-form>
       </q-card-section>
@@ -320,13 +373,10 @@
 <script setup>
 import { schedStore } from "src/stores/scheduler";
 import { computed, reactive, ref, watch } from "vue";
+import moment from "moment";
 
 import {
   QCalendarDay,
-  getDayTimeIdentifier,
-  getDateTime,
-  addToDate,
-  parseTimestamp,
   parseTime,
 } from "@quasar/quasar-ui-qcalendar/src/QCalendarDay.js";
 import "@quasar/quasar-ui-qcalendar/src/QCalendarVariables.sass";
@@ -339,7 +389,71 @@ const $q = useQuasar();
 const schedMode = ref("course");
 const schedules = computed(() => schedStore().schedules);
 
-const printSched = () => {
+const checkSched = (item) => {
+  //Check schedules
+  let data = null;
+  switch (schedMode.value) {
+    case "course":
+      data = {
+        field1: "instructorId",
+        fieldId1: item.instructorId,
+        field2: "roomId",
+        fieldId2: item.roomId,
+      };
+      break;
+    case "ins":
+      data = {
+        field1: "courseId",
+        fieldId1: item.courseId,
+        field2: "roomId",
+        fieldId2: item.roomId,
+      };
+      break;
+    case "room":
+      data = {
+        field1: "courseId",
+        fieldId1: item.courseId,
+        field2: "instructorId",
+        fieldId2: item.instructorId,
+      };
+      break;
+  }
+  schedStore().checkSched(item.id, data);
+};
+
+const displayScheduleTitle = () => {
+  let title = "";
+
+  if (schedules.value.length) {
+    switch (schedMode.value) {
+      case "course":
+        title = `${schedules.value[0].course.name}`;
+        break;
+      case "ins":
+        title = `${schedules.value[0].instructor.name}`;
+        break;
+      case "room":
+        title = `${schedules.value[0].room.room}`;
+        break;
+    }
+  }
+
+  return title;
+};
+
+const formatTime = (time) => moment(time, "h:mm a").format("h:mm a");
+const update = async () => {
+  const res = await schedStore().updateSchedule({ ...schedData });
+};
+
+const printObj = {
+  id: "printMe",
+  popTitle: "Invoice",
+  standard: "",
+  extraHead: '<meta http-equiv="Content-Language"content="en-us"/>',
+};
+
+/* const printSched = () => {
   // Get HTML to print from element
   const header = document.querySelector("#print-header").innerHTML;
   const div = document.querySelector("#printMe").innerHTML;
@@ -379,15 +493,21 @@ const printSched = () => {
   WinPrint.focus();
   WinPrint.print();
   WinPrint.close();
+}; */
+
+const syncSched = (mode) => {
+  schedMode.value = mode;
+  getScheds();
 };
 
-const handleSchedDialog = (sched) => {
+const handleSchedDialog = (sched, newSched) => {
   $q.dialog({
     component: SchedForm,
     componentProps: {
       sched: sched,
+      newSched: newSched,
     },
-  }).onOk(() => getScheds());
+  });
 };
 
 watch(schedMode, (newVal) => {
@@ -432,33 +552,95 @@ Calendar settings
  */
 const calendar = ref(null);
 
-const schedsMap = computed(() => {
-  const map = {};
-  // scheds.forEach(sched => (map[ sched.date ] = map[ sched.date ] || []).push(sched))
-  scheds.forEach((sched) => {
-    if (!map[sched.date]) {
-      map[sched.date] = [];
-    }
-    map[sched.date].push(sched);
-    if (sched.days) {
-      let timestamp = parseTimestamp(sched.date);
-      let days = sched.days;
-      do {
-        timestamp = addToDate(timestamp, { day: 1 });
-        if (!map[timestamp.date]) {
-          map[timestamp.date] = [];
-        }
-        map[timestamp.date].push(sched);
-      } while (--days > 0);
-    }
-  });
-  return map;
-});
+function onDragStart(event, item) {
+  event.dataTransfer.dropEffect = "copy";
+  event.dataTransfer.effectAllowed = "move";
+  event.dataTransfer.setData("ID", item.id);
+  Object.assign(schedData, { ...item });
+  checkSched(item);
+}
+
+function onDragEnter(e, type, scope) {
+  e.preventDefault();
+  return true;
+}
+
+function onDragOver(e, type, scope) {
+  e.preventDefault();
+  return true;
+}
+
+function onDragLeave(e, type, scope) {
+  return false;
+}
+
+const hidePopUP = ref(false);
+function onDrop(e, type, scope) {
+  const day = days[scope.timestamp.weekday];
+  const start = moment(scope.timestamp.time, "h:mm a").format("h:mm a");
+  const end = moment(scope.timestamp.time, "h:mm a")
+    .add(schedData.duration, "m")
+    .format("h:mm a");
+
+  // Fill form update
+  schedData.day = day;
+  schedData.start = scope.timestamp.time;
+  schedData.end = moment(end, "h:mm a").format("HH:mm");
+  schedData.duration = schedData.duration / 60;
+  if (!hidePopUP.value) {
+    $q.dialog({
+      title: "Change?",
+      message: `<div class='text-center'>
+          <div class='text-bold text-subtitle1 text-primary'>${day.day}</div>
+          <div class='text-bold text-negative'>${start} - ${end}</div>
+        </div>`,
+      html: true,
+      cancel: true,
+      options: {
+        type: "checkbox",
+        model: [],
+        items: [
+          {
+            label: "Do not show this message again.",
+            value: true,
+          },
+        ],
+      },
+    }).onOk((data) => {
+      if (data[0]) hidePopUP.value = data[0];
+      update();
+    });
+  } else {
+    update();
+  }
+  return false;
+}
+
+function leftClick(e) {
+  return e.button === 0;
+}
+
+function onMouseDownTime({ scope, event }) {
+  const i = scope.timestamp.weekday;
+  if (leftClick(event)) {
+    handleSchedDialog(
+      {
+        start: scope.timestamp.time,
+        day: days[i],
+        subjectId: schedData.subjectId,
+        courseId: schedData.courseId,
+        instructorId: schedData.instructorId,
+        roomId: schedData.roomId,
+      },
+      true
+    );
+  }
+}
 
 function badgeClasses(event, type) {
   const isHeader = type === "header";
   return {
-    [`text-white bg-purple`]: true,
+    [`text-white ${event.bgColor}`]: true,
     "full-width": !isHeader && (!event.side || event.side === "full"),
     "left-side": !isHeader && event.side === "left",
     "right-side": !isHeader && event.side === "right",
@@ -484,34 +666,6 @@ function badgeStyles(
 Calendar settings
  */
 
-const scheds = [
-  {
-    end: "8:00",
-    start: "7:00",
-    instructorId: "zRLvxZk4i3zq2MyTEIav",
-    day: 1,
-    duration: 60,
-    createdAt:
-      "[native Date Sun Jul 17 2022 13:46:26 GMT+0800 (Philippine Standard Time)]",
-    roomId: "5Cnz3jTo8SHs9kLjCxGo",
-    courseId: "fr0Gn1KOQGcL5eQ1yTAB",
-    subjectId: "EFyypu2y0EfpDZBLnn6B",
-    title: "PLOTED",
-    id: 1,
-    weekday: 1,
-    bgcolor: "purple",
-  },
-  {
-    id: 2,
-    title: "PLOTED",
-    weekday: 3,
-    start: "9:00",
-    end: "10:30",
-    duration: 120,
-    bgcolor: "purple",
-  },
-];
-
 const days = [
   { id: 0, day: "Sunday" },
   { id: 1, day: "Monday" },
@@ -526,6 +680,7 @@ const displayDay = (i) => {
 };
 
 const schedData = reactive({
+  id: "",
   subjectId: "",
   courseId: "",
   instructorId: "",
@@ -621,6 +776,7 @@ getData();
   text-overflow: ellipsis
   overflow: hidden
   cursor: pointer
+  border: 1px solid white
 
 .title
   position: relative

@@ -17,5 +17,10 @@ export const useDate = () => {
     return date.formatDate(timestamp, "MM/DD/YYYY");
   }
 
-  return { logDateFormat, logTimeFormat, fileDateFormat, numberSlashFormat };
+  return {
+    logDateFormat,
+    logTimeFormat,
+    fileDateFormat,
+    numberSlashFormat,
+  };
 };

@@ -1,175 +1,159 @@
 <template>
-  <q-dialog ref="dialogRef" @hide="onDialogHide">
+  <q-dialog
+    ref="dialogRef"
+    @hide="onDialogHide"
+    position="right"
+    full-height
+    persistent
+  >
     <q-card>
-      <q-card-section>Update Schedule</q-card-section>
+      <q-card-section class="text-h6"
+        >{{ newSched ? "Add" : "Update" }} Schedule</q-card-section
+      >
       <q-card-section>
-        <q-form @submit="update">
-          <div class="row q-gutter-x-sm justify-evenly">
-            <div class="col-12 col-md-5">
-              <!-- Subject -->
-              <q-select
-                dense
-                outlined
-                v-model="schedData.subjectId"
-                use-input
-                input-debounce="0"
-                label="Subject"
-                :options="subOptions"
-                option-label="code"
-                option-value="id"
-                emit-value
-                map-options
-                style="width: 250px"
-                @filter="filterSub"
-                :rules="[(val) => !!val || 'Subject is required!']"
-              >
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      No results
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+        <q-form @submit="newSched ? save() : update()">
+          <!-- Subject -->
+          <q-select
+            dense
+            outlined
+            v-model="schedData.subjectId"
+            use-input
+            input-debounce="0"
+            hint="Subject"
+            :options="subOptions"
+            option-label="code"
+            option-value="id"
+            emit-value
+            map-options
+            style="width: 250px"
+            @filter="filterSub"
+            :rules="[(val) => !!val || 'Subject is required!']"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey"> No results </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
-            <div class="col-12 col-md-5">
-              <!-- COurse year and section -->
-              <q-select
-                v-model="schedData.courseId"
-                dense
-                outlined
-                use-input
-                input-debounce="0"
-                label="Course & Section"
-                :options="courseOptions"
-                option-label="name"
-                option-value="id"
-                emit-value
-                map-options
-                style="width: 250px"
-                @filter="filterCourse"
-                :rules="[(val) => !!val || 'Course & section is required!']"
-              >
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      No results
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
+          <!-- Course -->
+          <q-select
+            v-model="schedData.courseId"
+            dense
+            outlined
+            use-input
+            input-debounce="0"
+            hint="Course & Section"
+            :options="courseOptions"
+            option-label="name"
+            option-value="id"
+            emit-value
+            map-options
+            style="width: 250px"
+            @filter="filterCourse"
+            :rules="[(val) => !!val || 'Course & section is required!']"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey"> No results </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
-          <div class="row q-gutter-x-sm q-mt-sm justify-evenly">
-            <div class="col-12 col-md-5">
-              <!-- Instructor -->
-              <q-select
-                v-model="schedData.instructorId"
-                use-input
-                dense
-                outlined
-                input-debounce="0"
-                label="Instructor"
-                :options="insOptions"
-                option-label="name"
-                option-value="id"
-                emit-value
-                map-options
-                style="width: 250px"
-                @filter="filterIns"
-                :rules="[(val) => !!val || 'Instructor is required!']"
-              >
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      No results
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
+          <!-- Instructor -->
+          <q-select
+            v-model="schedData.instructorId"
+            use-input
+            dense
+            outlined
+            input-debounce="0"
+            hint="Instructor"
+            :options="insOptions"
+            option-label="name"
+            option-value="id"
+            emit-value
+            map-options
+            style="width: 250px"
+            @filter="filterIns"
+            :rules="[(val) => !!val || 'Instructor is required!']"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey"> No results </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
-            <div class="col-12 col-md-5">
-              <!-- Rooms -->
-              <q-select
-                v-model="schedData.roomId"
-                dense
-                outlined
-                use-input
-                input-debounce="0"
-                label="Room"
-                :options="roomOptions"
-                option-label="room"
-                option-value="id"
-                emit-value
-                map-options
-                style="width: 250px"
-                @filter="filterRooms"
-                :rules="[(val) => !!val || 'Room is required!']"
-              >
-                <template v-slot:no-option>
-                  <q-item>
-                    <q-item-section class="text-grey">
-                      No results
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-select>
-            </div>
-          </div>
+          <!-- Rooms -->
+          <q-select
+            v-model="schedData.roomId"
+            dense
+            outlined
+            use-input
+            input-debounce="0"
+            hint="Room"
+            :options="roomOptions"
+            option-label="room"
+            option-value="id"
+            emit-value
+            map-options
+            style="width: 250px"
+            @filter="filterRooms"
+            :rules="[(val) => !!val || 'Room is required!']"
+          >
+            <template v-slot:no-option>
+              <q-item>
+                <q-item-section class="text-grey"> No results </q-item-section>
+              </q-item>
+            </template>
+          </q-select>
 
           <q-item-label class="q-mt-md q-mb-sm text-subtitle2"
             >Schedule</q-item-label
           >
-          <div class="row justify-evenly q-gutter-xs">
-            <div class="col-12 col-md-3">
-              <q-select
-                v-model="schedData.day"
-                outlined
-                dense
-                :options="days"
-                option-value="id"
-                option-label="day"
-                label="Day"
-                :rules="[(val) => !!val || 'Day is required!']"
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                v-model="schedData.start"
-                dense
-                outlined
-                type="time"
-                hint="Start"
-                :rules="[(val) => !!val || 'Start time is required!']"
-              />
-            </div>
-            <div class="col-12 col-md-3">
-              <q-input
-                v-model="schedData.end"
-                dense
-                outlined
-                type="time"
-                hint="End"
-                :rules="[(val) => !!val || 'End time is required!']"
-              />
-            </div>
-            <div class="col-12 col-md-2">
-              <q-input
-                :model-value="getDuration()"
-                dense
-                outlined
-                type="number"
-                hint="Duration"
-                readonly
+
+          <div>
+            <q-select
+              v-model="schedData.day"
+              outlined
+              dense
+              :options="days"
+              option-value="id"
+              option-label="day"
+              hint="Day"
+              :rules="[(val) => !!val || 'Day is required!']"
+            />
+
+            <q-input
+              v-model="schedData.start"
+              dense
+              outlined
+              type="time"
+              hint="Start"
+              :rules="[(val) => !!val || 'Start time is required!']"
+            />
+
+            <q-input
+              v-model="schedData.end"
+              dense
+              outlined
+              type="time"
+              hint="End"
+              :rules="[(val) => !!val || 'End time is required!']"
+            />
+
+            <q-input
+              :model-value="getDuration()"
+              dense
+              outlined
+              type="number"
+              hint="Duration"
+              readonly
+            >
+              <template v-slot:append
+                ><span class="text-caption">hrs</span></template
               >
-                <template v-slot:append
-                  ><span class="text-caption">hrs</span></template
-                >
-              </q-input>
-            </div>
+            </q-input>
           </div>
 
           <q-card-actions align="right">
@@ -187,7 +171,16 @@
               dense
               no-caps
               color="primary"
-              label="Update"
+              :label="newSched ? 'Add' : 'Update'"
+            />
+            <q-btn
+              unelevated
+              outline
+              dense
+              no-caps
+              color="dark"
+              label="Cancel"
+              v-close-popup
             />
           </q-card-actions>
         </q-form>
@@ -205,6 +198,7 @@ import { parseTime } from "@quasar/quasar-ui-qcalendar/src/QCalendarDay.js";
 defineEmits([...useDialogPluginComponent.emits]);
 const props = defineProps({
   sched: Object,
+  newSched: Boolean,
 });
 
 const schedData = reactive({
@@ -315,13 +309,23 @@ function getDuration() {
   return duration;
 }
 
+async function save() {
+  const res = await schedStore().addSchedule({ ...schedData });
+  if (res) onDialogOK();
+}
+
 const update = async () => {
   const res = await schedStore().updateSchedule({ ...schedData });
-  if (res) onDialogOK();
+  if (res) onDialogHide();
 };
 
 const remove = async () => {
   const res = await schedStore().deleteSchedule(schedData.id);
-  if (res) onDialogOK();
+  if (res) onDialogHide();
 };
 </script>
+
+<style lang="sass">
+.q-dialog__inner--minimized
+  padding: 0px !important
+</style>

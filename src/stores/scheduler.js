@@ -12,6 +12,50 @@ export const schedStore = defineStore("sched", {
   }),
 
   actions: {
+    async checkSched(id, data) {
+      Loading.show();
+      this.schedules = this.schedules.filter(
+        (item) => item.other != true || item.id == id
+      );
+      const schedRef = fs.collection(db, "schedules");
+      const q1 = fs.query(
+        schedRef,
+        fs.where(`${data.field1}`, "==", data.fieldId1)
+      );
+      const q2 = fs.query(
+        schedRef,
+        fs.where(`${data.field2}`, "==", data.fieldId2)
+      );
+      const docs = [];
+      const docs1 = await fs.getDocs(q1);
+      const docs2 = await fs.getDocs(q2);
+      docs1.forEach((doc1) => docs.push(doc1));
+      docs2.forEach((doc2) => docs.push(doc2));
+
+      await docs.forEach(async (doc) => {
+        const schedData = { ...doc.data(), id: doc.id };
+        schedData.createdAt = schedData.createdAt.toDate();
+        schedData.duration *= 60;
+        // Get Subject
+        schedData.subject = await this.getData(schedData.subjectId, "subjects");
+        schedData.course = await this.getData(schedData.courseId, "courses");
+        schedData.instructor = await this.getData(
+          schedData.instructorId,
+          "instructors"
+        );
+        schedData.room = await this.getData(schedData.roomId, "rooms");
+        schedData.bgColor = "bg-grey-6";
+        schedData.other = true;
+
+        const i = this.schedules.findIndex((item) => item.id == doc.id);
+        if (i == -1) {
+          this.schedules.push(schedData);
+        }
+      });
+
+      Loading.hide();
+    },
+
     async updateSchedule(sched) {
       Loading.show();
       const docRef = fs.doc(db, "schedules", sched.id);
@@ -19,6 +63,17 @@ export const schedStore = defineStore("sched", {
         ...sched,
         updatedAt: fs.serverTimestamp(),
       });
+
+      const i = this.schedules.findIndex((item) => item.id == sched.id);
+      sched.updatedAt = new Date();
+      sched.duration *= 60;
+      // Get Subject
+      sched.subject = await this.getData(sched.subjectId, "subjects");
+      sched.course = await this.getData(sched.courseId, "courses");
+      sched.instructor = await this.getData(sched.instructorId, "instructors");
+      sched.room = await this.getData(sched.roomId, "rooms");
+
+      this.schedules[i] = sched;
 
       Loading.hide();
 
@@ -59,6 +114,7 @@ export const schedStore = defineStore("sched", {
         const schedData = { ...doc.data(), id: doc.id };
         schedData.createdAt = schedData.createdAt.toDate();
         schedData.duration *= 60;
+        schedData.bgColor = "bg-purple";
         // Get Subject
         schedData.subject = await this.getData(schedData.subjectId, "subjects");
         schedData.course = await this.getData(schedData.courseId, "courses");
@@ -85,11 +141,26 @@ export const schedStore = defineStore("sched", {
 
     async addSchedule(schedData) {
       Loading.show();
+      delete schedData.id;
       const schedRef = fs.collection(db, "schedules");
-      await fs.addDoc(schedRef, {
+      const doc = await fs.addDoc(schedRef, {
         ...schedData,
         createdAt: fs.serverTimestamp(),
       });
+
+      schedData.id = doc.id;
+      schedData.createdAt = new Date();
+      schedData.duration *= 60;
+      // Get Subject
+      schedData.subject = await this.getData(schedData.subjectId, "subjects");
+      schedData.course = await this.getData(schedData.courseId, "courses");
+      schedData.instructor = await this.getData(
+        schedData.instructorId,
+        "instructors"
+      );
+      schedData.room = await this.getData(schedData.roomId, "rooms");
+
+      this.schedules.push(schedData);
 
       Notify.create({
         type: "positive",
@@ -131,6 +202,7 @@ export const schedStore = defineStore("sched", {
       this.courses.unshift({
         ...courseData,
         id: doc.id,
+        name: `${courseData.course} - ${courseData.year}${courseData.section}`,
         createdAt: new Date(),
       });
 

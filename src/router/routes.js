@@ -24,15 +24,19 @@ const routes = [
         path: "/home",
         component: () => import("src/pages/HomePage.vue"),
       },
-      {
+      /*  {
         path: "/lobby",
         component: () => import("src/pages/LobbyPage.vue"),
-      },
+      }, */
 
       // Scheduler Routes
       {
         path: "/scheduler/manage-data",
         component: () => import("src/pages/scheduler/ManageData.vue"),
+      },
+      {
+        path: "/scheduler/manage-workload",
+        component: () => import("src/pages/scheduler/WorkLoad.vue"),
       },
       {
         path: "/scheduler/plot-schedule",

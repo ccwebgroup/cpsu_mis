@@ -7,6 +7,7 @@
       <q-card-section>
         <q-form @submit="subj ? update() : save()" class="q-gutter-y-md">
           <q-input
+            dense
             v-model="subjData.code"
             outlined
             placeholder="Subject code"
@@ -14,9 +15,53 @@
           />
           <q-input
             v-model="subjData.desc"
+            dense
             placeholder="Subject description"
             :rules="[(val) => !!val || 'Subject description is required!']"
           />
+          <div class="row items-center q-gutter-x-xs">
+            <div class="form-control">
+              <q-input
+                dense
+                outlined
+                v-model="subjData.units"
+                hint="Units"
+                mask="#"
+                :rules="[(val) => !!val || 'Field is required!']"
+              />
+            </div>
+            <div class="form-control">
+              <q-input
+                dense
+                outlined
+                v-model="subjData.lab"
+                hint="Lab"
+                mask="#"
+                :rules="[(val) => !!val || 'Field is required!']"
+              />
+            </div>
+
+            <div class="form-control">
+              <q-input
+                dense
+                outlined
+                v-model="subjData.lec"
+                hint="Lec"
+                mask="#"
+                :rules="[(val) => !!val || 'Field is required!']"
+              />
+            </div>
+
+            <div class="form-control">
+              <q-input
+                dense
+                outlined
+                :model-value="getTotalHours()"
+                hint="Total hours"
+                readonly
+              />
+            </div>
+          </div>
           <q-card-actions align="right" class="q-gutter-x-sm">
             <q-btn
               type="submit"
@@ -31,6 +76,11 @@
     </q-card>
   </q-dialog>
 </template>
+
+<style lang="sass" scoped>
+.form-control
+  max-width: 80px
+</style>
 
 <script setup>
 import { reactive } from "vue";
@@ -48,10 +98,20 @@ const subjData = reactive({
   id: "",
   code: "",
   desc: "",
+  units: 0,
+  lab: 0,
+  lec: 0,
+  totalHours: 0,
 });
 
 if (props.subj) {
   Object.assign(subjData, props.subj);
+}
+
+function getTotalHours() {
+  const total = parseInt(subjData.lec) + parseInt(subjData.lab);
+  subjData.totalHours = total;
+  return total;
 }
 
 const save = async () => {

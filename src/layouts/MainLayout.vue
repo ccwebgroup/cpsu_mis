@@ -62,6 +62,14 @@
                 <q-item-label class="text-subititle">Manage Data</q-item-label>
               </q-item-section>
             </q-item>
+            <q-item clickable to="/scheduler/manage-workload" :inset-level="1">
+              <q-item-section avatar>
+                <q-icon name="pending_actions" />
+              </q-item-section>
+              <q-item-section>
+                <q-item-label class="text-subititle">Workload</q-item-label>
+              </q-item-section>
+            </q-item>
             <q-item clickable to="/scheduler/plot-schedule" :inset-level="1">
               <q-item-section avatar>
                 <q-icon name="date_range" />
@@ -229,11 +237,11 @@ const linksList = [
     icon: "home",
     link: "/home",
   },
-  {
-    title: "Lobby",
-    icon: "space_dashboard",
-    link: "/lobby",
-  },
+  // {
+  //   title: "Lobby",
+  //   icon: "space_dashboard",
+  //   link: "/lobby",
+  // },
 ];
 
 // Authuser

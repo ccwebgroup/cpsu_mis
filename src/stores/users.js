@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-import { Notify, Dialog } from "quasar";
+import { Notify, Dialog, Loading } from "quasar";
 
 import { db, auth, fa, fs } from "src/boot/firebase";
 
@@ -9,6 +9,7 @@ export const useUserStore = defineStore("users", {
   }),
   actions: {
     async setUserRole(uid, role) {
+      Loading.show();
       const token = await auth.currentUser.getIdToken();
       let roleData = {};
       switch (role) {
@@ -52,10 +53,13 @@ export const useUserStore = defineStore("users", {
         });
       } catch (err) {
         console.log(err);
+      } finally {
+        Loading.hide();
       }
     },
 
     async updateUser(payload) {
+      Loading.show();
       const token = await auth.currentUser.getIdToken();
       try {
         const result = await this.api.put(
@@ -85,6 +89,8 @@ export const useUserStore = defineStore("users", {
         }
       } catch (err) {
         console.log(err.message);
+      } finally {
+        Loading.hide();
       }
     },
 
@@ -95,6 +101,7 @@ export const useUserStore = defineStore("users", {
         message: "Are you sure you want to delete the user?",
         cancel: true,
       }).onOk(async () => {
+        Loading.show();
         try {
           const result = await this.api.delete("deleteUser/" + uid, {
             headers: {
@@ -111,11 +118,15 @@ export const useUserStore = defineStore("users", {
             message: "User permanently deleted.",
             icon: "delete_forever",
           });
-        } catch (err) {}
+        } catch (err) {
+        } finally {
+          Loading.hide();
+        }
       });
     },
 
     async getUsers() {
+      Loading.show();
       const token = await auth.currentUser.getIdToken();
       try {
         const result = await this.api.get("getUsers", {
@@ -135,10 +146,13 @@ export const useUserStore = defineStore("users", {
         });
       } catch (err) {
         console.log(err);
+      } finally {
+        Loading.hide();
       }
     },
 
     async addUser(payload) {
+      Loading.show();
       const token = await auth.currentUser.getIdToken();
       try {
         const result = await this.api.post("addUser", payload, {
@@ -155,15 +169,20 @@ export const useUserStore = defineStore("users", {
         }
       } catch (err) {
         console.log(err.message);
+      } finally {
+        Loading.hide();
       }
     },
 
-    logoutUser() {
-      auth.signOut();
+    async logoutUser() {
+      Loading.show();
+      await auth.signOut();
+      Loading.hide();
       this.router.replace("/auth/login");
     },
 
     async loginUser(payload) {
+      Loading.show();
       try {
         const userCredential = await fa.signInWithEmailAndPassword(
           auth,
@@ -182,16 +201,21 @@ export const useUserStore = defineStore("users", {
           title: "Sign in Error",
           message: errorMessage,
         });
+      } finally {
+        Loading.hide();
       }
     },
 
     async reauthUser(payload) {
+      Loading.show();
       const credential = fa.EmailAuthProvider.credential(
         payload.email,
         payload.password
       );
 
       await fa.reauthenticateWithCredential(auth.currentUser, credential);
+
+      Loading.hide();
       return credential;
     },
   },

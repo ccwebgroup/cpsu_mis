@@ -10,3 +10,25 @@ body {
 .bordered-left {
   border-left: 1px solid rgb(206, 206, 206);
 }
+
+.q-field--auto-height.q-field--dense .q-field__control,
+.q-field--auto-height.q-field--dense .q-field__native {
+  min-height: 32px;
+}
+
+.q-field--dense .q-field__control,
+.q-field--dense .q-field__marginal {
+  height: 32px;
+}
+
+.q-field__bottom {
+  padding: 4px 10px 0;
+}
+
+.text-sm {
+  font-size: 10px;
+}
+
+.text-xs {
+  font-size: 8px;
+}

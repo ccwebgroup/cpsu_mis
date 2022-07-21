@@ -97,7 +97,7 @@ module.exports = configure(function (ctx) {
       // directives: [],
 
       // Quasar plugins
-      plugins: ["Notify", "Dialog", "Dark"],
+      plugins: ["Notify", "Dialog", "Dark", "Loading"],
     },
 
     // animations: 'all', // --- includes all animations

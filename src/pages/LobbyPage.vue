@@ -9,7 +9,13 @@
         <q-chat-message
           v-for="message in messagesData"
           :key="message.id"
-          :name="message.sent ? '' : message.from.displayName"
+          :name="
+            message.sent
+              ? ''
+              : message.from.displayName
+              ? message.from.displayName
+              : 'User deleted'
+          "
           :sent="message.sent"
           :text-color="message.sent ? 'white' : ''"
           :bg-color="message.sent ? 'primary' : 'grey-4'"
@@ -29,7 +35,11 @@
                 :src="message.from.photoURL"
                 alt=""
               />
-              <span v-else>{{ message.from.displayName[0] }}</span>
+              <span v-else>{{
+                message.from.displayName
+                  ? message.from.displayName[0]
+                  : "User deleted"
+              }}</span>
             </q-avatar>
           </template>
           <template v-slot:stamp>
